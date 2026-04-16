@@ -2,174 +2,101 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Official Typing Exam System - Bijoy Fixed</title>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <title>Official Typing Exam - Bijoy Fix</title>
     <style>
-        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; --teal: #17a2b8; }
-        html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); overflow-x: hidden; }
-        .container { display: flex; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .box { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 10px; }
+        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); padding: 20px; }
+        .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
         .hidden { display: none !important; }
         
-        /* ফন্ট সেটিংস: SutonnyMJ অবশ্যই থাকতে হবে */
+        /* ফন্ট সেটিংস: SutonnyMJ কিবোর্ড লেআউটের জন্য জরুরি */
         #passage-stable, #t-input, #user-compare-text { 
-            font-family: 'SutonnyMJ', Arial, sans-serif; 
+            font-family: 'SutonnyMJ', 'Arial Unicode MS', sans-serif; 
         }
 
-        #passage-stable { font-size: 26px; line-height: 1.8; height: 280px; overflow-y: auto; text-align: justify; user-select: none; margin-bottom: 20px; }
-        .input-box { border: 2px solid var(--blue); border-radius: 8px; padding: 15px; background: #fff; margin-top: 10px; }
-        textarea { width: 100%; height: 110px; font-size: 24px; border: none; outline: none; resize: none; color: #333; }
+        #passage-stable { font-size: 26px; line-height: 1.8; text-align: justify; margin-bottom: 20px; }
+        textarea { width: 100%; height: 120px; font-size: 24px; border: 2px solid var(--blue); border-radius: 8px; padding: 10px; outline: none; }
         .error-highlight { color: var(--red); text-decoration: underline; font-weight: bold; }
-        .btn-main { background: var(--blue); color: white; padding: 12px; border: none; border-radius: 5px; width: 100%; cursor: pointer; font-weight: bold; }
-        
-        /* রেজাল্ট কার্ড স্টাইল */
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .card { padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 8px; }
-        .card h4 { margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .btn-main { background: var(--blue); color: white; padding: 12px 40px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="page-login" class="box" style="max-width:400px; margin: 50px auto; text-align:center;">
-        <h2 style="color: var(--blue);">টাইপিং পরীক্ষা</h2>
-        <input type="text" id="login-user" placeholder="আপনার নাম লিখুন" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px;">
-        <button class="btn-main" onclick="doLogin()">পরীক্ষা শুরু করুন</button>
+<div id="page-exam">
+    <div class="box" style="display: flex; justify-content: space-between;">
+        <div>👤 পরীক্ষার্থী: <b>Emrul Kayes</b></div>
+        <div style="color: var(--red); font-weight: bold;">সময় চলছে...</div>
     </div>
-
-    <div id="page-exam" class="hidden">
-        <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>👤 পরীক্ষার্থী: <b><span id="display-name"></span></b></div>
-            <div style="color: var(--red); font-size: 20px; font-weight: bold;">সময়: <span id="timer">05:00</span></div>
-        </div>
-        <div id="passage-stable" class="box"><div id="p-text"></div></div>
-        <div class="input-box">
-            <textarea id="t-input" placeholder="বিজয় ক্লাসিক (SutonnyMJ) মোডে টাইপ করুন..." oninput="startCount()" onpaste="return false;"></textarea>
-        </div>
-        <div style="text-align: right; margin-top: 15px;">
-            <button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">Go to Finish</button>
-        </div>
+    <div id="passage-stable" class="box">
+        ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
     </div>
-
-    <div id="page-result" class="box hidden">
-        <h2 style="text-align:center; color: var(--blue);">টাইপিং ফলাফল ও বিস্তারিত</h2>
-        <div class="result-grid">
-            <div class="card" style="border-top: 4px solid var(--green);">
-                <h4>গতি</h4>
-                <p>🚀 WPM: <b id="r-wpm"></b></p>
-                <p>🎯 Accuracy: <b id="r-acc">0%</b></p>
-            </div>
-            <div class="card" style="border-top: 4px solid var(--teal);">
-                <h4>গণনা</h4>
-                <p>📊 Character: <span id="r-char">0</span></p>
-                <p>✅ সঠিক: <span id="r-cor">0</span></p>
-            </div>
-            <div class="card" style="border-top: 4px solid var(--red);">
-                <h4>বিশ্লেষণ</h4>
-                <p>❌ ভুল শব্দ: <span id="r-wrong">0</span></p>
-                <p>📉 ভুলের হার: <span id="r-err">0%</span></p>
-            </div>
-        </div>
-        <div class="box" style="margin-top:20px;">
-            <strong>আপনার টাইপ করা টেক্সট:</strong>
-            <div id="user-compare-text" style="line-height:1.8; font-size:22px; margin-top:10px; padding:10px; background:#f9f9f9; border-radius:5px;"></div>
-        </div>
-        <center><button class="btn-main" style="width: 200px;" onclick="location.reload()">আবার চেষ্টা করুন</button></center>
+    <div class="box">
+        <textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ করুন..." oninput="startCount()"></textarea>
+    </div>
+    <div style="text-align: right;">
+        <button class="btn-main" style="background: var(--green);" onclick="finishExam()">Go to Finish</button>
     </div>
 </div>
 
+<div id="page-result" class="box hidden">
+    <h2 style="color: var(--blue);">টাইপিং ফলাফল</h2>
+    <div id="res-stats" style="font-size: 18px; margin-bottom: 15px;"></div>
+    <div id="user-compare-text" style="line-height: 1.8; font-size: 24px; padding: 15px; background: #f9f9f9; border-radius: 5px;"></div>
+    <button class="btn-main" style="margin-top: 20px;" onclick="location.reload()">আবার চেষ্টা করুন</button>
+</div>
+
 <script>
-    let passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা। আজ মাদ্রিদে দ্বিতীয় লেগে ২-১ গোলে জিতলেও প্রথম লেগে ২-০ গোলে পিছিয়ে থাকায় দুই লেগ মিলিয়ে ৩-২ ব্যবধানে কোয়ার্টার ফাইনালে হেরেছে হান্সি ফ্লিকের দল।";
-    let examDuration = 300, timeLeft = examDuration, timerOn = false, timerInt;
-
-    document.getElementById('p-text').innerText = passage;
-
-    // --- BIJOY CLASSIC TO UNICODE NORMALIZER ---
-    function bijoyToCompare(str) {
+    let passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    
+    // ১. বিজয় ক্লাসিকের স্পেশাল ক্যারেক্টার হ্যান্ডলিং ইঞ্জিন
+    function bijoyToUnicode(str) {
         if (!str) return "";
-        // বিজয় ৫২ ক্লাসিকের ইংরেজি ইনপুট ম্যাপিং
         const map = {
             'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
             'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
-            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '|':'।'
+            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০'
         };
 
-        let converted = "";
+        let res = "";
         for (let i = 0; i < str.length; i++) {
-            let char = str[i], next = str[i+1];
-            // কার-চিহ্ন পজিশন ফিক্স (বিজয় ক্লাসিক অনুযায়ী)
-            if (['d', 'c', 'C'].includes(char) && next) {
-                converted += (map[next] || next) + (map[char] || char);
+            let cur = str[i], nxt = str[i+1];
+            // কার-চিহ্ন পজিশন ফিক্সিং লজিক
+            if (['d', 'c', 'C'].includes(cur) && nxt) {
+                res += (map[nxt] || nxt) + (map[cur] || cur);
                 i++;
             } else {
-                converted += map[char] || char;
+                res += map[cur] || cur;
             }
         }
-        return converted.normalize('NFC').trim();
+        return res.normalize('NFC').trim();
     }
 
-    function startCount() {
-        if(!timerOn) {
-            timerOn = true;
-            timerInt = setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft/60), s = timeLeft%60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                if(timeLeft <= 0) finishExam();
-            }, 1000);
-        }
-    }
+    function startCount() { /* টাইমার লজিক */ }
 
     function finishExam() {
-        clearInterval(timerInt);
         const rawInput = document.getElementById('t-input').value;
         const iWords = rawInput.trim().split(/\s+/);
         const pWords = passage.trim().split(/\s+/);
 
-        let correctChars = 0, wrongWords = 0, comparisonHTML = "";
+        let correctCount = 0, comparisonHTML = "";
 
         pWords.forEach((word, idx) => {
-            const userRawWord = iWords[idx] || "";
-            const convUser = bijoyToCompare(userRawWord);
+            const userWordRaw = iWords[idx] || "";
+            const convUser = bijoyToUnicode(userWordRaw);
             const normPass = word.normalize('NFC').trim();
 
             if (convUser === normPass && normPass !== "") {
-                comparisonHTML += `<span style="color:black">${userRawWord} </span>`;
-                correctChars += word.length + 1;
-            } else if (userRawWord !== "") {
-                wrongWords++;
-                comparisonHTML += `<span class="error-highlight">${userRawWord}</span> `;
+                comparisonHTML += `<span style="color:black">${userWordRaw} </span>`;
+                correctCount++;
+            } else if (userWordRaw !== "") {
+                comparisonHTML += `<span class="error-highlight">${userRawWord || userWordRaw}</span> `;
             }
         });
 
-        // রেজাল্ট ক্যালকুলেশন
-        const timeSpent = examDuration - timeLeft;
-        const wpm = Math.round((rawInput.length / 5) / (timeSpent / 60 || 1));
-        let accuracy = (rawInput.length > 0) ? (correctChars / rawInput.length) * 100 : 0;
-        let errorRate = (rawInput.length > 0) ? ((rawInput.length - correctChars) / rawInput.length) * 100 : 0;
-
-        document.getElementById('r-wpm').innerText = wpm;
-        document.getElementById('r-acc').innerText = (accuracy > 100 ? 100 : accuracy).toFixed(2) + "%";
-        document.getElementById('r-char').innerText = rawInput.length;
-        document.getElementById('r-cor').innerText = correctChars > rawInput.length ? rawInput.length : correctChars;
-        document.getElementById('r-wrong').innerText = wrongWords;
-        document.getElementById('r-err').innerText = (errorRate < 0 ? 0 : errorRate).toFixed(2) + "%";
+        document.getElementById('res-stats').innerHTML = `সঠিক শব্দ: ${correctCount} / ${pWords.length}`;
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
-        
-        showPage('page-result');
-    }
-
-    function showPage(id) {
-        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function doLogin() {
-        const u = document.getElementById('login-user').value;
-        if(u) {
-            document.getElementById('display-name').innerText = u;
-            showPage('page-exam');
-        } else alert("অনুগ্রহ করে আপনার নাম লিখুন।");
+        document.getElementById('page-exam').classList.add('hidden');
+        document.getElementById('page-result').classList.remove('hidden');
     }
 </script>
 </body>
