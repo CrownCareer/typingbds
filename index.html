@@ -2,9 +2,9 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Typing Simulator - Fixed</title>
+    <title>BCC Standard Final Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; text-align: center; }
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         #passage-box, #typing-area, #analysis { 
@@ -24,7 +24,7 @@
 <body>
 
 <div class="container">
-    <h2 style="color: #1a73e8; text-align: center;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
+    <h2 style="color: #1a73e8;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
     
     <div class="stats-bar">
         <div>নির্ভুলতা: <span id="accuracy">০.০০</span>%</div>
@@ -33,57 +33,57 @@
 
     <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
 
-    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক দিয়ে টাইপ শুরু করুন..." oninput="bccFinalEngine()"></textarea>
+    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক দিয়ে টাইপ শুরু করুন..." oninput="runBCCEngine()"></textarea>
 
     <div id="analysis"></div>
 </div>
 
 <script>
-    const targetPassage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
 
     // এই ডিকোডারটি আপনার ছবির 'সালের', 'পর' শব্দগুলোকে ফিক্স করবে
     function bccDecoder(str) {
         if (!str) return "";
-        const m = {
+        const mapping = {
             'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
             'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ও','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
             '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০',
-            '‡':'ে','†':'ে','v':'া','i':'ি','`':'্য','´':'্য','I':'ও'
+            '‡':'ে','†':'ে','v':'া','i':'ি','`':'্য','´':'্য','I':'ও','x':'ও'
         };
 
         let result = "";
         for (let i = 0; i < str.length; i++) {
             let cur = str[i], nxt = str[i+1];
-            // বিজয় কার-চিহ্ন পজিশন শিফটিং (ে, ি, ৈ)
+            // কার-চিহ্ন পজিশন শিফটিং (বিজয় টু ইউনিকোড)
             if (['d', '‡', '†', 'c', 'C', 'i'].includes(cur) && nxt) {
-                result += (m[nxt] || nxt) + (m[cur] || cur);
+                result += (mapping[nxt] || nxt) + (mapping[cur] || cur);
                 i++;
             } else {
-                result += m[cur] || cur;
+                result += mapping[cur] || cur;
             }
         }
         return result.normalize('NFC').replace(/র‌্য/g, 'র্য');
     }
 
-    function bccFinalEngine() {
-        const inputVal = document.getElementById('typing-area').value;
-        const uWords = inputVal.trim().split(/\s+/);
-        const pWords = targetPassage.split(/\s+/);
+    function runBCCEngine() {
+        const input = document.getElementById('typing-area').value;
+        const uWords = input.trim().split(/\s+/);
+        const pWords = passage.split(/\s+/);
         
         let correctCount = 0;
         let html = "টাইপিং বিশ্লেষণ: <br>";
 
         pWords.forEach((word, index) => {
-            let raw = uWords[index] || "";
-            let decoded = bccDecoder(raw);
+            let rawInput = uWords[index] || "";
+            let decodedInput = bccDecoder(rawInput);
             let target = word.normalize('NFC').trim();
 
             // ডুয়াল চেক: সরাসরি মিললে অথবা ডিকোড করে মিললে (সঠিক)
-            if ((decoded === target || raw === target) && target !== "") {
-                html += `<span class="correct">${raw} </span>`;
+            if ((decodedInput === target || rawInput === target) && target !== "") {
+                html += `<span class="correct">${rawInput} </span>`;
                 correctCount++;
-            } else if (raw !== "") {
-                html += `<span class="wrong">${raw}</span> `;
+            } else if (rawInput !== "") {
+                html += `<span class="wrong">${rawInput}</span> `;
             }
         });
 
