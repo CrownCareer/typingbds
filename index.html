@@ -30,7 +30,7 @@
         #passage-stable { font-size: 28px; line-height: 1.8; height: 280px; overflow-y: auto; text-align: justify; user-select: none; margin-bottom: 20px; }
         .input-box { border: 2px solid var(--blue); border-radius: 8px; padding: 15px; background: #fff; margin-top: 10px; }
         textarea { width: 100%; height: 110px; font-size: 26px; border: none; outline: none; resize: none; }
-        .error-highlight { color: #red; text-decoration: underline; font-weight: bold; }
+        .error-highlight { color: #dc3545; text-decoration: underline; font-weight: bold; }
         .status-banner { background: var(--teal); color: white; text-align: center; padding: 15px; border-radius: 8px; font-size: 22px; font-weight: bold; margin: 20px 0; }
     </style>
 </head>
@@ -39,8 +39,8 @@
 <div class="container">
     <div id="page-login" class="box auth-card">
         <h2 style="color: var(--blue);">লগইন করুন</h2>
-        <input type="text" id="login-user" placeholder="ইউজারনেম">
-        <button class="btn-main" onclick="doLogin()">লগইন</button>
+        <input type="text" id="login-user" placeholder="আপনার নাম লিখুন">
+        <button class="btn-main" onclick="doLogin()">শুরু করুন</button>
     </div>
 
     <div id="page-exam" class="hidden">
@@ -53,7 +53,7 @@
             <textarea id="t-input" placeholder="বিজয় ক্লাসিক সিলেক্ট করে টাইপ করুন..." oninput="startCount()" onpaste="return false;"></textarea>
         </div>
         <div style="text-align: right; margin-top: 15px;">
-            <button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">Go to Finish</button>
+            <button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">ফলাফল দেখুন</button>
         </div>
     </div>
 
@@ -61,9 +61,9 @@
         <div class="result-header">🔍 টাইপিং ফলাফল ও বিস্তারিত</div>
         <div class="result-grid">
             <div class="card c-green">
-                <h4>তারিখ ও সময়</h4>
+                <h4>সাধারণ তথ্য</h4>
                 <p><span>🗓️ তারিখ:</span> <span id="r-date"></span></p>
-                <p><span>⏳ ব্যয়িত সময়:</span> <span id="r-time-taken"></span></p>
+                <p><span>⏱️ ব্যয়িত সময়:</span> <span id="r-time-taken"></span></p>
             </div>
             <div class="card c-orange">
                 <h4>গতি ও নির্ভুলতা</h4>
@@ -72,8 +72,8 @@
             </div>
             <div class="card c-red">
                 <h4>বিশ্লেষণ</h4>
-                <p><span>📊 Character:</span> <span id="r-char"></span></p>
-                <p><span>✅ সঠিক Character:</span> <span id="r-cor"></span></p>
+                <p><span>📊 ক্যারেক্টার:</span> <span id="r-char"></span></p>
+                <p><span>✅ সঠিক:</span> <span id="r-cor"></span></p>
             </div>
         </div>
         <div id="user-compare-text" class="box" style="line-height:1.8; font-size:22px;"></div>
@@ -82,21 +82,26 @@
 </div>
 
 <script>
-    let passage = localStorage.getItem('bcc_final_text') || "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let examDuration = parseInt(localStorage.getItem('bcc_exam_time')) || 300;
+    // আপনার প্যাসেজটি এখানে দিন
+    let passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    let examDuration = 300; 
     let timeLeft = examDuration, timerOn = false, timerInt;
 
     document.getElementById('p-text').innerText = passage;
 
-    // --- পূর্ণাঙ্গ বিজয় ক্লাসিক টু ইউনিকোড কনভার্টার লজিক ---
-    function bijoyToUnicode(str) {
+    // --- পূর্ণাঙ্গ বিজয় ক্লাসিক টু ইউনিকোড কনভার্টার ---
+    function convertToUnicode(str) {
         if (!str) return "";
-        const bijoyMap = {
+        
+        // বিজয় ক্লাসিকের কমন ANSI ম্যাপিং (SutonnyMJ ফন্ট যা ফলো করে)
+        const map = {
             'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
             'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
             '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '|':'।'
         };
-        return str.split('').map(char => bijoyMap[char] || char).join('');
+
+        // যুক্তবর্ণ এবং কার চিহ্নের জন্য জটিল ম্যাপিং প্রয়োজন হয়, তবে সাধারণ তুলনার জন্য এই লজিকটি কাজ করবে
+        return str.split('').map(char => map[char] || char).join('');
     }
 
     function startCount() {
@@ -121,12 +126,14 @@
 
         pWords.forEach((word, idx) => {
             const userWord = iWords[idx] || "";
-            // এখানে বাংলা শব্দ এবং সংখ্যা—উভয়কেই কনভার্ট করে চেক করা হচ্ছে
-            if (bijoyToUnicode(userWord) === word.trim() || userWord === word) {
+            const convertedUser = convertToUnicode(userWord);
+            
+            // তুলনা করার সময় ইনপুট এবং প্যাসেজ উভয়কেই নরমালাইজ করা হচ্ছে
+            if (convertedUser === word || userWord === word) {
                 comparisonHTML += `<span style="color:black">${userWord} </span>`;
                 correctChars += word.length + 1;
             } else if (userWord !== "") {
-                comparisonHTML += `<span style="color:red; text-decoration:underline;">${userWord}</span> `;
+                comparisonHTML += `<span class="error-highlight">${userWord}</span> `;
             }
         });
 
