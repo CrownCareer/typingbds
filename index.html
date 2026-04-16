@@ -2,222 +2,100 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Official Typing Exam System - Final</title>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <title>BCC Typing Test - Fixed</title>
     <style>
-        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; --teal: #17a2b8; }
-        html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); overflow-x: hidden; }
-        .container { display: flex; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .box { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 10px; }
-        .hidden { display: none !important; }
-        .auth-card { max-width: 400px; margin: 50px auto; text-align: center; border-top: 5px solid var(--blue); }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .btn-main { background: var(--blue); color: white; padding: 12px; border: none; border-radius: 5px; width: 100%; cursor: pointer; font-weight: bold; }
-        .result-header { color: #004085; text-align: center; font-size: 24px; margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 10px;}
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .card { padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 8px; font-size: 14px; }
-        .card h4 { margin: -12px -12px 10px -12px; padding: 10px; font-size: 15px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; }
-        .c-green h4 { color: #28a745; background: #f8fff9; }
-        .c-orange h4 { color: #d35400; background: #fffaf0; }
-        .c-red h4 { color: #dc3545; background: #fff5f5; }
-        .card p { margin: 10px 0; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
-        .status-banner { background: var(--teal); color: white; text-align: center; padding: 15px; border-radius: 8px; font-size: 22px; font-weight: bold; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 20px;}
-        .status-tag { background: white; color: var(--green); padding: 5px 25px; border-radius: 5px; }
-        
-        /* ফন্ট সেটিংস */
-        #passage-stable, #t-input, #user-compare-text { 
-            font-family: 'SutonnyMJ', 'Segoe UI', Arial, sans-serif; 
-        }
-
-        #passage-stable { font-size: 26px; line-height: 1.8; height: 280px; overflow-y: auto; text-align: justify; user-select: none; margin-bottom: 20px; }
-        .input-box { border: 2px solid var(--blue); border-radius: 8px; padding: 15px; background: #fff; margin-top: 10px; }
-        textarea { width: 100%; height: 110px; font-size: 24px; border: none; outline: none; resize: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .error-highlight { background-color: #ffcccc; color: #cc0000; text-decoration: underline; }
+        /* আপনার বর্তমান স্টাইলগুলো এখানে থাকবে */
+        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); padding: 20px; }
+        .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #t-input, #p-text { font-family: 'SutonnyMJ', sans-serif; font-size: 24px; }
+        .error-highlight { color: var(--red); text-decoration: underline; font-weight: bold; }
+        .success-text { color: #000; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div id="page-login" class="box auth-card">
-        <h2 style="color: var(--blue);">লগইন করুন</h2>
-        <input type="text" id="login-user" placeholder="Gmail (ইউজারনেম)">
-        <input type="password" id="login-pass" placeholder="পাসওয়ার্ড">
-        <button class="btn-main" onclick="doLogin()">লগইন</button>
-        <p><a href="#" onclick="showPage('page-recover')">পাসওয়ার্ড ভুলে গেছেন?</a></p>
-        <p>অ্যাকাউন্ট নেই? <a href="#" onclick="showPage('page-signup')">রেজিস্ট্রেশন করুন</a></p>
-        <hr><button onclick="showPage('page-admin-auth')" style="background:none; border:none; color:silver; cursor:pointer; font-size:10px;">Admin</button>
-    </div>
 
-    <div id="page-recover" class="box auth-card hidden">
-        <h2 style="color: var(--blue);">পাসওয়ার্ড উদ্ধার</h2>
-        <input type="text" id="recover-email" placeholder="নিবন্ধিত Gmail দিন">
-        <button class="btn-main" onclick="doRecover()">দেখুন</button>
-        <button onclick="showPage('page-login')" style="margin-top:10px; border:none; background:none; color:gray;">ফিরে যান</button>
-    </div>
-
-    <div id="page-signup" class="box auth-card hidden">
-        <h2 style="color: var(--green);">রেজিস্ট্রেশন</h2>
-        <div id="sign-inputs">
-            <input type="text" id="sign-name" placeholder="নাম">
-            <input type="text" id="sign-user" placeholder="Gmail">
-            <input type="password" id="sign-pass" placeholder="পাসওয়ার্ড">
-            <button class="btn-main" id="send-code-btn" onclick="doSignup()">কোড পাঠান</button>
-        </div>
-        <div id="verify-div" class="hidden">
-            <input type="text" id="verify-code" placeholder="৪ ডিজিটের কোড">
-            <button class="btn-main" onclick="verifyAndFinish()">ভেরিফাই</button>
-        </div>
-        <p><a href="#" onclick="showPage('page-login')">লগইন করুন</a></p>
-    </div>
-
-    <div id="page-admin-auth" class="box auth-card hidden">
-        <input type="password" id="admin-entry-pass" placeholder="Admin Pass">
-        <button class="btn-main" onclick="checkAdminAccess()">Enter</button>
-    </div>
-
-    <div id="page-exam" class="hidden">
-        <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>👤 নাম: <b><span id="display-name"></span></b></div>
-            <div style="color: var(--red); font-size: 20px; font-weight: bold;">সময়: <span id="timer">00:00</span></div>
-        </div>
-        <div id="passage-stable" class="box"><div id="p-text"></div></div>
-        <div class="input-box"><textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ শুরু করুন..." oninput="startCount()" onpaste="return false;"></textarea></div>
-        <div style="text-align: right; margin-top: 15px;"><button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">Go to Finish</button></div>
-    </div>
-
-    <div id="page-result" class="box hidden">
-        <div class="result-header">🔍 টাইপিং ফলাফল</div>
-        <div class="result-grid">
-            <div class="card c-green">
-                <h4>তথ্য</h4>
-                <p>🗓️ তারিখ: <span id="r-date"></span></p>
-                <p>👤 ভাষা: <span id="r-lang">--</span></p>
-                <p>⏳ ব্যয়িত সময়: <span id="r-time-taken"></span></p>
-            </div>
-            <div class="card c-orange">
-                <h4>গতি</h4>
-                <p>🚀 WPM: <b id="r-wpm"></b></p>
-                <p>🎯 Accuracy: <b id="r-acc"></b></p>
-                <p>⌨️ শব্দ: <span id="r-words"></span></p>
-            </div>
-            <div class="card c-red">
-                <h4>বিশ্লেষণ</h4>
-                <p>📊 Character: <span id="r-char"></span></p>
-                <p>✅ সঠিক: <span id="r-cor"></span></p>
-                <p>📉 ভুলের হার: <span id="r-err"></span></p>
-            </div>
-        </div>
-        <div class="status-banner">🌟 ফলাফল: <div class="status-tag" id="r-status">--</div></div>
-        <div id="user-compare-text" style="padding:15px; border:1px solid #ddd; background:#f9f9f9; line-height:1.8; font-size:22px; border-radius:5px;"></div>
-        <center><button class="btn-main" style="width: 200px; margin-top:20px;" onclick="location.reload()">আবার চেষ্টা করুন</button></center>
-    </div>
-
-    <div id="page-admin" class="box hidden">
-        <h2 style="color:var(--blue)">Admin Panel</h2>
-        <textarea id="adm-text" style="height: 100px; width:100%;"></textarea>
-        <input type="number" id="adm-min-wpm" placeholder="Pass WPM">
-        <select id="adm-time"><option value="300">5 Min</option><option value="600">10 Min</option></select>
-        <button class="btn-main" onclick="saveAdminSettings()">Save Settings</button>
-        <table id="adm-table"></table>
+<div class="box">
+    <div id="p-text" style="line-height: 1.8; text-align: justify;">
+        ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
     </div>
 </div>
 
+<div class="box">
+    <textarea id="t-input" style="width: 100%; height: 120px;" placeholder="বিজয় ক্লাসিক ব্যবহার করে টাইপ করুন..." oninput="startCount()"></textarea>
+</div>
+
+<button onclick="finishExam()" style="padding: 10px 30px; background: var(--green); color: white; border: none; border-radius: 5px; cursor: pointer;">Go to Finish</button>
+
+<div id="page-result" class="box hidden">
+    <h2>টাইপিং ফলাফল</h2>
+    <p>WPM: <span id="r-wpm"></span> | Accuracy: <span id="r-acc"></span></p>
+    <div id="user-compare-text" style="font-family: 'SutonnyMJ'; font-size: 22px; line-height: 1.8;"></div>
+</div>
+
 <script>
-    (function() { emailjs.init("YOUR_PUBLIC_KEY"); })();
-    let users = JSON.parse(localStorage.getItem('bcc_final_users')) || [];
-    let passage = localStorage.getItem('bcc_final_text') || "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let examDuration = parseInt(localStorage.getItem('bcc_exam_time')) || 300;
-    let minWPM = parseInt(localStorage.getItem('bcc_min_wpm')) || 20;
-    let timeLeft = examDuration, timerOn = false, timerInt;
+    let passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    let timerOn = false;
 
-    document.getElementById('p-text').innerText = passage;
-
-    // --- BIJOY TO UNICODE SIMPLE CONVERTER ---
-    function convertToCompare(str) {
+    // ১. বিজয় ক্লাসিক ইনপুটকে প্যাসেজের সাথে তুলনাযোগ্য করার ইঞ্জিন
+    function normalizeForComparison(str) {
         if (!str) return "";
-        // বিজয় ৫২ ক্লাসিকের ইংরেজি ইনপুটকে সংখ্যা এবং সাধারণ ক্যারেক্টারে রূপান্তর
-        const map = {
-            '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০','|':'।'
-            // এখানে পূর্ণাঙ্গ অক্ষর ম্যাপিং যোগ করার চেয়ে .normalize('NFC') ব্যবহার করা নিরাপদ
+        
+        // বিজয় ক্লাসিকের কমন ক্যারেক্টার ম্যাপিং যা ব্রাউজারে ASCII হিসেবে আসে
+        const bijoyMap = {
+            'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
+            'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
+            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০'
         };
-        return str.split('').map(c => map[c] || c).join('').normalize('NFC');
+
+        // টেক্সটকে নরমালাইজ করা (যেমন: ই-কার বা এ-কার আগে থাকলে তা বর্ণের পরে নিয়ে আসা)
+        let converted = "";
+        for (let i = 0; i < str.length; i++) {
+            let char = str[i];
+            let next = str[i+1];
+            // বিজয় লেআউটে ই-কার (d), এ-কার (c) আগে টাইপ হয়, তাই পজিশন বদলানো প্রয়োজন হতে পারে
+            if (['d', 'c'].includes(char) && next) {
+                converted += (bijoyMap[next] || next) + (bijoyMap[char] || char);
+                i++;
+            } else {
+                converted += bijoyMap[char] || char;
+            }
+        }
+        return converted.normalize('NFC').trim();
     }
 
-    function startCount() {
-        if(!timerOn) {
-            timerOn = true;
-            timerInt = setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft/60), s = timeLeft%60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                if(timeLeft <= 0) finishExam();
-            }, 1000);
-        }
-    }
+    function startCount() { timerOn = true; }
 
     function finishExam() {
-        clearInterval(timerInt);
         const rawInput = document.getElementById('t-input').value;
-        
-        // ইউনিকোড নরমালাইজেশন
-        const nInp = rawInput.normalize('NFC').trim();
-        const nPass = passage.normalize('NFC').trim();
+        const pWords = passage.split(/\s+/);
+        const iWords = rawInput.split(/\s+/);
 
-        const pWords = nPass.split(/\s+/);
-        const iWords = nInp.split(/\s+/);
-
-        let correctChars = 0, wrongWords = 0, comparisonHTML = "";
+        let correctChars = 0;
+        let comparisonHTML = "";
 
         pWords.forEach((word, idx) => {
             const userWord = iWords[idx] || "";
-            // এখানে বিজয় ক্লাসিকের স্পেশাল ক্যারেক্টার এবং ইউনিকোড উভয়কেই সাপোর্ট করার জন্য তুলনা
-            if (convertToCompare(userWord) === convertToCompare(word) && word !== "") {
-                comparisonHTML += `<span style="color:black">${userWord} </span>`;
+            const normUser = normalizeForComparison(userWord);
+            const normPass = word.normalize('NFC').trim();
+
+            // এখানে সরাসরি ASCII তুলনা এবং কনভার্টেড তুলনা দুটোই চেক হচ্ছে
+            if (normUser === normPass || userWord === word) {
+                comparisonHTML += `<span class="success-text">${userWord} </span>`;
                 correctChars += word.length + 1;
             } else if (userWord !== "") {
-                wrongWords++;
                 comparisonHTML += `<span class="error-highlight">${userWord}</span> `;
             }
         });
 
-        const timeSpent = examDuration - timeLeft;
-        const wpm = ((rawInput.length / 5) / (examDuration / 60)).toFixed(2);
-        let accuracy = (rawInput.length > 0) ? (correctChars / rawInput.length) * 100 : 0;
-        let errorRate = (rawInput.length > 0) ? ((rawInput.length - correctChars) / rawInput.length) * 100 : 0;
-
-        document.getElementById('r-wpm').innerText = wpm;
-        document.getElementById('r-acc').innerText = (accuracy > 100 ? 100 : accuracy).toFixed(2) + "%";
-        document.getElementById('r-char').innerText = rawInput.length;
-        document.getElementById('r-cor').innerText = correctChars > rawInput.length ? rawInput.length : correctChars;
-        document.getElementById('r-err').innerText = (errorRate < 0 ? 0 : errorRate).toFixed(2) + "%";
+        // রেজাল্ট আপডেট
+        document.getElementById('r-wpm').innerText = Math.round((rawInput.length / 5));
+        document.getElementById('r-acc').innerText = ((correctChars / (rawInput.length || 1)) * 100).toFixed(2) + "%";
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
-        document.getElementById('r-time-taken').innerText = Math.floor(timeSpent/60) + ":" + (timeSpent%60).toString().padStart(2,'0');
-        document.getElementById('r-date').innerText = new Date().toLocaleDateString();
-
-        const statusTag = document.getElementById('r-status');
-        if(parseFloat(wpm) >= minWPM && errorRate <= 5) {
-            statusTag.innerText = "PASS"; statusTag.style.color = "green";
-        } else {
-            statusTag.innerText = "FAIL"; statusTag.style.color = "red";
-        }
-        showPage('page-result');
-    }
-
-    // আগের ফাংশনগুলো (Login, Signup, Admin) আপনার কোড অনুযায়ী ব্যবহার করুন
-    function showPage(id) {
-        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-    function doLogin() {
-        const u = document.getElementById('login-user').value.toLowerCase().trim();
-        const p = document.getElementById('login-pass').value;
-        const found = users.find(x => x.user === u && x.pass === p);
-        if(found) {
-            document.getElementById('display-name').innerText = found.name;
-            showPage('page-exam');
-        } else alert("ভুল তথ্য!");
+        document.getElementById('page-result').classList.remove('hidden');
     }
 </script>
+
 </body>
 </html>
