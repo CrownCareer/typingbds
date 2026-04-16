@@ -107,15 +107,11 @@
 
     document.getElementById('p-text').innerText = passage;
 
-    // --- বিজয় ক্লাসিক (ANSI) টু ইউনিকোড কনভার্টার লজিক ---
-    function ansitoUni(str) {
-        let res = str;
-        let map = {
-            "a": "ঋ", "b": "ন", "c": "এ", "d": "ি", "e": "ড", "f": "া", "g": "হ", "h": "ব", "i": "হ", "j": "র", "k": "ক", "l": "ত", "m": "ম", "n": "স", "o": "গ", "p": "ড়", "q": "ঙ", "r": "প", "s": "ু", "t": "ট", "u": "ঝ", "v": "ল", "w": "য়", "x": "ও", "y": "চ", "z": "য", "A": "ৃ", "B": "ণ", "C": "ঐ", "D": "ী", "E": "ঢ", "F": "অ", "G": "।", "H": "ভ", "I": "ক্ষ", "J": "্র", "K": "খ", "L": "থ", "M": "উ", "N": "ষ", "O": "ঘ", "P": "ঢ়", "Q": "ং", "R": "ফ", "S": "ূ", "T": "ঠ", "U": "ঝ", "V": "ল", "W": "য়", "X": "ৗ", "Y": "ছ", "Z": "্য", "1": "১", "2": "২", "3": "৩", "4": "৪", "5": "৫", "6": "৬", "7": "৭", "8": "৮", "9": "৯", "0": "০"
-        };
-        // নোট: পূর্ণাঙ্গ কনভার্টার অনেক বড় হয়, এখানে মূল কনসেপ্ট হলো আপনার ইনপুট এবং প্যাসেজ উভয়কেই একই কোড পেজে নিয়ে আসা।
-        // যেহেতু আপনি প্যাসেজও সুতন্নিতে লিখছেন, আমরা সরাসরি ক্যারেক্টার টু ক্যারেক্টার কম্পারিজন করব।
-        return res; 
+    // --- বিজয় ক্লাসিক (ANSI) টু ইউনিকোড ম্যাপার লজিক ---
+    function convertBijoyToUni(text) {
+        // বিজয় ক্লাসিকের কমন ক্যারেক্টার ম্যাপ (ম্যাচিং নিশ্চিত করার জন্য)
+        const map = {"1":"১","2":"২","3":"৩","4":"৪","5":"৫","6":"৬","7":"৭","8":"৮","9":"৯","0":"০","|":"।"};
+        return text.split('').map(char => map[char] || char).join('');
     }
 
     function startCount() {
@@ -134,17 +130,20 @@
         clearInterval(timerInt);
         const rawInput = document.getElementById('t-input').value;
         
-        // সবথেকে কার্যকর উপায়: ইনপুট এবং প্যাসেজ উভয়কেই ট্রিম করে স্পেস দিয়ে ভাগ করা
+        // ইনপুট এবং প্যাসেজ উভয়কে একই ফরমেটে আনা হচ্ছে
         const iWords = rawInput.trim().split(/\s+/);
         const pWords = passage.trim().split(/\s+/);
 
         let correctChars = 0, wrongWordsCount = 0, comparisonHTML = "";
 
-        // ওয়ার্ড বাই ওয়ার্ড ম্যাচিং (সুতন্নি মোডেই)
         pWords.forEach((word, idx) => {
-            const userWord = iWords[idx] || "";
-            // এখানে ক্যারেক্টার কোড লেভেলে চেক করা হচ্ছে যাতে বিজয় ভুল না ধরে
-            if (userWord.normalize() === word.normalize() && word !== "") {
+            let userWord = iWords[idx] || "";
+            
+            // বিজয় ক্লাসিকের ইংরেজি সংখ্যা ও দাড়িকে ইউনিকোডে রূপান্তর করে চেক করা
+            let mappedUserWord = convertBijoyToUni(userWord);
+            let mappedPassageWord = convertBijoyToUni(word);
+
+            if (mappedUserWord === mappedPassageWord && word !== "") {
                 comparisonHTML += `<span style="color:black">${userWord} </span>`;
                 correctChars += word.length + 1;
             } else if (userWord !== "") {
@@ -166,9 +165,8 @@
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
         document.getElementById('r-date').innerText = new Date().toLocaleDateString();
         document.getElementById('r-time-taken').innerText = Math.floor(timeSpent/60) + ":" + (timeSpent%60).toString().padStart(2,'0');
-        document.getElementById('r-total-time-label').innerText = (examDuration/60) + " মিনিট";
 
-        const status = (wpm >= minWPM && accuracy >= 90) ? "PASS" : "FAIL";
+        const status = (wpm >= minWPM && accuracy >= 80) ? "PASS" : "FAIL";
         document.getElementById('r-status').innerText = status;
         document.getElementById('r-status').style.color = status === "PASS" ? "green" : "red";
 
@@ -181,9 +179,8 @@
     }
 
     function doLogin() {
-        const u = document.getElementById('login-user').value.toLowerCase().trim();
-        const p = document.getElementById('login-pass').value;
-        if(u && p) {
+        const u = document.getElementById('login-user').value;
+        if(u) {
             document.getElementById('display-name').innerText = u;
             showPage('page-exam');
         }
