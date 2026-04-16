@@ -2,71 +2,100 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Style Final Fix</title>
+    <title>BCC Standard Typing Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; }
-        .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; }
+        .box { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
         
-        /* এই অংশটি আপনার স্ক্রিনে বাংলা দেখাবে */
-        #p-text, #t-input, #display-text { 
-            font-family: 'SutonnyMJ', 'SolaimanLipi', sans-serif; 
+        /* সুতন্বীএমজে ফন্ট পিসিতে থাকলে টাইপ করার সময় বাংলা দেখাবে */
+        #p-text, #t-input, #user-compare-text { 
+            font-family: 'SutonnyMJ', 'Arial', sans-serif; 
             font-size: 26px; line-height: 1.8;
         }
-        
-        textarea { width: 100%; height: 120px; border: 2px solid #0056b3; border-radius: 8px; padding: 15px; outline: none; }
+        textarea { width: 100%; height: 120px; border: 2px solid var(--blue); border-radius: 8px; padding: 10px; outline: none; }
         .correct { color: black; }
-        .wrong { color: #dc3545; text-decoration: underline; font-weight: bold; }
+        .wrong { color: var(--red); text-decoration: underline; font-weight: bold; }
+        .hidden { display: none !important; }
+        .btn { background: var(--green); color: white; padding: 12px 40px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <strong>প্যাসেজটি দেখে টাইপ করুন:</strong>
-    <div id="p-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+<div id="exam-page">
+    <div class="box">
+        <div id="p-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+    </div>
+    <div class="box">
+        <textarea id="t-input" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে টাইপ করুন..."></textarea>
+    </div>
+    <div style="text-align: right;">
+        <button class="btn" onclick="processResult()">ফলাফল দেখুন</button>
+    </div>
 </div>
 
-<div class="box">
-    <textarea id="t-input" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে এখানে টাইপ করুন..." oninput="checkTyping()"></textarea>
-</div>
-
-<div class="box" id="result-box">
-    <strong>লাইভ স্ট্যাটাস:</strong>
-    <div id="display-text"></div>
+<div id="result-page" class="box hidden">
+    <h2 style="text-align: center; color: var(--blue);">টাইপিং ফলাফল</h2>
+    <div id="stats" style="text-align:center; font-size: 22px; margin-bottom: 15px; font-weight: bold;"></div>
+    <div id="user-compare-text" class="box" style="background: #f9f9f9; border: 1px solid #ddd;"></div>
+    <center><button class="btn" style="background: var(--blue);" onclick="location.reload()">আবার চেষ্টা করুন</button></center>
 </div>
 
 <script>
     const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
 
-    function checkTyping() {
-        const userInput = document.getElementById('t-input').value;
-        const uWords = userInput.split(/\s+/);
-        const pWords = passage.split(/\s+/);
-        
-        let html = "";
-        let correctWords = 0;
+    // এই ফাংশনটি বিজয়ের জটিল যুক্তবর্ণ ও কার-চিহ্নগুলোকে ইউনিকোডে রূপান্তর করবে
+    function bijoyToUnicode(str) {
+        if (!str) return "";
+        const map = {
+            'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
+            'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
+            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '&':'ষ', '`':'~'
+        };
 
-        pWords.forEach((word, i) => {
-            let uWord = uWords[i] || "";
-            
-            // BCC-র মতো সরাসরি ক্যারেক্টার কম্পারিজন
-            // যদি ফন্ট ঠিক থাকে, তবে বিজয় ক্লাসিক ইনপুট সরাসরি ইউনিকোড প্যাসেজের সাথে মিলবে
-            if (uWord === word && uWord !== "") {
-                html += `<span class="correct">${uWord} </span>`;
+        let result = "";
+        for (let i = 0; i < str.length; i++) {
+            let cur = str[i], nxt = str[i+1];
+            // ই-কার, এ-কার এর পজিশন ফিক্স (বিজয় টু ইউনিকোড লজিক)
+            if (['d', 'c', 'C'].includes(cur) && nxt) {
+                result += (map[nxt] || nxt) + (map[cur] || cur);
+                i++;
+            } else {
+                result += map[cur] || cur;
+            }
+        }
+        // NFC Normalization: এটিই BCC সিস্টেমের আসল সমাধান
+        return result.normalize('NFC').replace(/র‌্য/g, 'র্য').trim();
+    }
+
+    function processResult() {
+        const userInput = document.getElementById('t-input').value;
+        const iWords = userInput.trim().split(/\s+/);
+        const pWords = passage.trim().split(/\s+/);
+
+        let correctWords = 0;
+        let comparisonHTML = "";
+
+        pWords.forEach((word, idx) => {
+            const userRaw = iWords[idx] || "";
+            const converted = bijoyToUnicode(userRaw);
+            const target = word.normalize('NFC').trim();
+
+            if (converted === target && target !== "") {
+                comparisonHTML += `<span class="correct">${userRaw} </span>`;
                 correctWords++;
-            } else if (uWord !== "") {
-                html += `<span class="wrong">${uWord}</span> `;
+            } else if (userRaw !== "") {
+                comparisonHTML += `<span class="wrong">${userRaw}</span> `;
             }
         });
+
+        const acc = ((correctWords / pWords.length) * 100).toFixed(2);
+        document.getElementById('stats').innerHTML = `Accuracy: ${acc}% | Correct Words: ${correctWords}`;
+        document.getElementById('user-compare-text').innerHTML = comparisonHTML;
         
-        document.getElementById('display-text').innerHTML = html;
-        
-        // টাইটেল বারে লাইভ নির্ভুলতা দেখানো
-        let accuracy = (correctWords / pWords.length) * 100;
-        if(userInput.length > 0) {
-            console.log("Accuracy: " + accuracy.toFixed(2) + "%");
-        }
+        document.getElementById('exam-page').classList.add('hidden');
+        document.getElementById('result-page').classList.remove('hidden');
     }
 </script>
-
 </body>
 </html>
