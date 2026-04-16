@@ -28,17 +28,14 @@
         .status-tag { background: white; color: var(--green); padding: 5px 25px; border-radius: 5px; }
         
         #passage-stable, #t-input, #user-compare-text, #original-text-result, #adm-text { 
-            font-family: 'SutonnyMJ', sans-serif; 
+            font-family: 'SutonnyMJ', Arial, sans-serif; 
         }
 
         #passage-stable { font-size: 28px; line-height: 1.8; height: 280px; overflow-y: auto; text-align: justify; user-select: none; margin-bottom: 20px; }
         .input-box { border: 2px solid var(--blue); border-radius: 8px; padding: 15px; background: #fff; margin-top: 10px; }
         textarea { width: 100%; height: 110px; font-size: 26px; border: none; outline: none; resize: none; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         .error-highlight { color: #dc3545; text-decoration: underline; font-weight: bold; }
-        .expiry-edit { width: 130px !important; padding: 5px !important; margin: 0 !important; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -91,18 +88,23 @@
         </div>
         <div class="status-banner">🌟 ফলাফল: <div class="status-tag" id="r-status">--</div></div>
         <div id="user-compare-text" style="padding:15px; border:1px solid #ddd; background:#f9f9f9; line-height:1.8; font-size:22px; border-radius:5px; margin-top:15px;"></div>
-        <center><button class="btn-main" style="width: 200px; margin-top:20px;" onclick="resetForNewExam()">আবার চেষ্টা করুন</button></center>
+        <center><button class="btn-main" style="width: 200px; margin-top:20px;" onclick="location.reload()">আবার চেষ্টা করুন</button></center>
     </div>
 </div>
 
 <script>
-    // আপনার আগের সব ভেরিয়েবল এবং ডিক্লারেশন
-    let passage = localStorage.getItem('bcc_final_text') || "প্যাসেজ এখানে দিন।";
+    let passage = localStorage.getItem('bcc_final_text') || "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
     let examDuration = parseInt(localStorage.getItem('bcc_exam_time')) || 300;
     let minWPM = parseInt(localStorage.getItem('bcc_min_wpm')) || 20;
     let timeLeft = examDuration, timerOn = false, timerInt;
 
     document.getElementById('p-text').innerText = passage;
+
+    // বিজয় ৫২ ক্লাসিকের ইংরেজি সংখ্যাকে ইউনিকোড বাংলায় রূপান্তর করার ম্যাপ
+    function normalize(str) {
+        const map = {"1":"১","2":"২","3":"৩","4":"৪","5":"৫","6":"৬","7":"৭","8":"৮","9":"৯","0":"০","|":"।"};
+        return str.split('').map(c => map[c] || c).join('');
+    }
 
     function startCount() {
         if(!timerOn) {
@@ -116,28 +118,21 @@
         }
     }
 
-    // --- এই ফাংশনটিই আপনার মূল সমস্যার সমাধান করবে ---
     function finishExam() {
         clearInterval(timerInt);
         const rawInput = document.getElementById('t-input').value;
         
-        // বিজয় ৫২ ক্লাসিকের 'ইংরেজি' সংখ্যার সাথে ইউনিকোড সংখ্যা মেলাবার ম্যাপ
-        const convertToCompare = (text) => {
-            const map = {"1":"১","2":"২","3":"৩","4":"৪","5":"৫","6":"৬","7":"৭","8":"৮","9":"৯","0":"০","|":"।"};
-            return text.split('').map(c => map[c] || c).join('');
-        };
-
+        // ইনপুট এবং প্যাসেজ স্পেস দিয়ে ভাগ করা
         const iWords = rawInput.trim().split(/\s+/);
         const pWords = passage.trim().split(/\s+/);
 
         let correctChars = 0, wrongWordsCount = 0, comparisonHTML = "";
 
-        // আপনার কোডের মূল লজিক অপরিবর্তিত রেখে শুধু কম্পারিজন পার্ট ঠিক করা হয়েছে
         pWords.forEach((word, idx) => {
             const userWord = iWords[idx] || "";
-            // এখানে কনভার্ট করে তুলনা করা হচ্ছে যাতে বিজয় ভুল না দেখায়
-            if (convertToCompare(userWord) === convertToCompare(word) && word !== "") {
-                comparisonHTML += `<span style="color:black">${userWord} </span>`;
+            // নরমাল ক্যারেক্টার এবং বিজয় ক্লাসিকের ইংরেজি সংখ্যা—উভয়কেই ইউনিকোড করে চেক করা হচ্ছে
+            if (normalize(userWord) === normalize(word) && word !== "") {
+                comparisonHTML += `<span>${userWord} </span>`;
                 correctChars += word.length + 1;
             } else if (userWord !== "") {
                 wrongWordsCount++;
@@ -145,7 +140,6 @@
             }
         });
 
-        // রেজাল্ট ক্যালকুলেশন (আপনার দেওয়া আগের কোড অনুযায়ী)
         const timeSpent = examDuration - timeLeft;
         const wpm = Math.round((rawInput.length / 5) / (examDuration / 60));
         let accuracy = (rawInput.length > 0) ? (correctChars / rawInput.length) * 100 : 0;
@@ -160,21 +154,28 @@
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
         document.getElementById('r-date').innerText = new Date().toLocaleDateString();
         document.getElementById('r-time-taken').innerText = Math.floor(timeSpent/60) + ":" + (timeSpent%60).toString().padStart(2,'0');
+        document.getElementById('r-total-time-label').innerText = (examDuration/60) + " মিনিট";
 
         const status = (wpm >= minWPM && accuracy >= 90) ? "PASS" : "FAIL";
-        document.getElementById('r-status').innerText = status;
-        document.getElementById('r-status').style.color = status === "PASS" ? "green" : "red";
+        const st = document.getElementById('r-status');
+        st.innerText = status;
+        st.style.color = status === "PASS" ? "green" : "red";
 
         showPage('page-result');
     }
 
-    // আপনার অন্যান্য ফাংশন (doLogin, showPage ইত্যাদি) এখানে থাকবে...
     function showPage(id) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
-    function doLogin() { showPage('page-exam'); } 
-    function resetForNewExam() { location.reload(); }
+
+    function doLogin() {
+        const u = document.getElementById('login-user').value;
+        if(u) {
+            document.getElementById('display-name').innerText = u;
+            showPage('page-exam');
+        }
+    }
 </script>
 </body>
 </html>
