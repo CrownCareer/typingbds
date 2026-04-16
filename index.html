@@ -2,79 +2,95 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Standard Typing Fix</title>
+    <title>BCC Typing Test - Final Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; text-align: center; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #0056b3; }
-        #passage-box { background: #fff9c4; padding: 20px; font-size: 24px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 20px; text-align: left; line-height: 1.6; font-family: 'SutonnyMJ', serif; }
-        textarea { width: 100%; height: 150px; font-size: 24px; padding: 15px; border: 2px solid #0056b3; border-radius: 8px; font-family: 'SutonnyMJ', serif; box-sizing: border-box; }
-        .correct { color: #28a745; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        
+        /* সুতন্বীএমজে ফন্ট পিসিতে ইনস্টল থাকলে এটি হুবহু BCC-র মতো দেখাবে */
+        #passage-box, #typing-input, #analysis { 
+            font-family: 'SutonnyMJ', 'Arial', serif; 
+            font-size: 26px; line-height: 1.6; text-align: left;
+        }
+        
+        #passage-box { background: #fff9c4; padding: 20px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 20px; color: #333; }
+        textarea { width: 100%; height: 160px; padding: 15px; border: 2px solid #0056b3; border-radius: 8px; outline: none; box-sizing: border-box; }
+        
+        .stats { display: flex; justify-content: space-around; background: #202124; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+        .correct { color: #28a745; }
         .wrong { color: #d93025; text-decoration: underline; font-weight: bold; }
-        #analysis { margin-top: 20px; text-align: left; font-family: 'SutonnyMJ'; font-size: 22px; }
+        #analysis { margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
-    <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
-    <textarea id="typing-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ করুন..." oninput="checkTyping()"></textarea>
+    <h2 style="color: #0056b3;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
     
+    <div class="stats">
+        <div>সময় বাকি: <span id="timer">০৫:০০</span></div>
+        <div>গতি (WPM): <span id="wpm">০</span></div>
+        <div>নির্ভুলতা: <span id="accuracy">০.০০</span>%</div>
+    </div>
+
+    <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+
+    <textarea id="typing-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ শুরু করুন..." oninput="evaluateTyping()"></textarea>
+
     <div id="analysis"></div>
-    <div id="final-stats" style="margin-top:20px; font-weight:bold; font-size:20px;"></div>
 </div>
 
 <script>
-    const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-
-    // বিসিসি স্পেশাল কনভার্টার - যা আপনার ছবির ওই ইংরেজি সংকেতগুলোকে (mv‡ji) বাংলায় রূপান্তর করবে
-    function bccFullMap(str) {
+    const targetText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    
+    // এই ইঞ্জিনটি আপনার কিবোর্ডের বিশেষ সংকেতগুলোকে (যেমন: ‡, v, i) ইউনিকোডে রূপান্তর করবে
+    function bccMappingEngine(str) {
         if (!str) return "";
-        const map = {
-            'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
-            'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ক্ষ','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
-            '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০','‡':'ে','†':'ে'
+        const m = {
+            'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
+            'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
+            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '‡':'ে', '†':'ে', 'v':'া'
         };
 
         let res = "";
         for (let i = 0; i < str.length; i++) {
             let cur = str[i], nxt = str[i+1];
-            // বিজয় ক্লাসিকের '‡' (ে-কার) বা 'd' (ি-কার) আগে আসার লজিক
+            // বিজয় ক্লাসিকের কার-চিহ্ন পজিশন শিফটিং (যেমন: '‡' বা 'd' আগে আসে)
             if (['d', '‡', '†', 'c', 'C'].includes(cur) && nxt) {
-                res += (map[nxt] || nxt) + (map[cur] || cur);
+                res += (m[nxt] || nxt) + (m[cur] || cur);
                 i++;
             } else {
-                res += map[cur] || cur;
+                res += m[cur] || cur;
             }
         }
         return res.normalize('NFC').replace(/র‌্য/g, 'র্য');
     }
 
-    function checkTyping() {
-        const input = document.getElementById('typing-input').value;
-        const words = input.trim().split(/\s+/);
-        const pWords = passage.split(/\s+/);
+    function evaluateTyping() {
+        const inputVal = document.getElementById('typing-input').value;
+        const uWords = inputVal.trim().split(/\s+/);
+        const pWords = targetText.split(/\s+/);
         
+        let correctCount = 0;
         let html = "";
-        let correct = 0;
 
-        pWords.forEach((target, i) => {
-            let raw = words[i] || "";
-            let converted = bccFullMap(raw);
-            let targetNorm = target.normalize('NFC').trim();
+        pWords.forEach((pWord, i) => {
+            let uRaw = uWords[i] || "";
+            let uConv = bccMappingEngine(uRaw);
+            let target = pWord.normalize('NFC').trim();
 
-            if (converted === targetNorm && targetNorm !== "") {
-                html += `<span class="correct">${raw} </span>`;
-                correct++;
-            } else if (raw !== "") {
-                html += `<span class="wrong">${raw}</span> `;
+            // ডুয়াল চেক: যদি সরাসরি মেলে অথবা কনভার্ট করার পর মেলে
+            if ((uConv === target || uRaw === target) && target !== "") {
+                html += `<span class="correct">${uRaw} </span>`;
+                correctCount++;
+            } else if (uRaw !== "") {
+                html += `<span class="wrong">${uRaw}</span> `;
             }
         });
 
+        const acc = ((correctCount / pWords.length) * 100).toFixed(2);
+        document.getElementById('accuracy').innerText = acc;
         document.getElementById('analysis').innerHTML = "টাইপিং বিশ্লেষণ: <br>" + html;
-        let acc = ((correct / pWords.length) * 100).toFixed(2);
-        document.getElementById('final-stats').innerText = `নির্ভুলতা: ${acc}% | সঠিক শব্দ: ${correct}`;
     }
 </script>
 
