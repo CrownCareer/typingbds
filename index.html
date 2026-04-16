@@ -27,9 +27,8 @@
         .status-banner { background: var(--teal); color: white; text-align: center; padding: 15px; border-radius: 8px; font-size: 22px; font-weight: bold; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 20px;}
         .status-tag { background: white; color: var(--green); padding: 5px 25px; border-radius: 5px; }
         
-        /* বিজয় ৫২ ফন্ট সাপোর্ট এখানে যুক্ত করা হয়েছে */
         #passage-stable, #t-input, #user-compare-text, #original-text-result, #adm-text { 
-            font-family: 'SutonnyMJ', 'SoshilaMJ', 'Segoe UI', sans-serif; 
+            font-family: 'SutonnyMJ', sans-serif; 
         }
 
         #passage-stable { font-size: 28px; line-height: 1.8; height: 280px; overflow-y: auto; text-align: justify; user-select: none; margin-bottom: 20px; }
@@ -38,7 +37,7 @@
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .error-highlight { background-color: #ffcccc; color: #cc0000; text-decoration: underline; }
+        .error-highlight { color: #dc3545; text-decoration: underline; font-weight: bold; }
         .expiry-edit { width: 130px !important; padding: 5px !important; margin: 0 !important; font-size: 11px; }
     </style>
 </head>
@@ -274,21 +273,19 @@
         const inpBox = document.getElementById('t-input');
         const rawInput = inpBox.value;
 
-        // বিজয় ৫২ এর সমস্যার জন্য বিশেষ ক্লিনিং লজিক
-        const cleanText = (text) => {
-            return text.normalize('NFC') 
-                       .replace(/[\u200B-\u200D\uFEFF]/g, '') 
-                       .trim();
-        };
+        // টাইপ ক্লিনিং এবং নরমালাইজেশন
+        const cleanStr = (s) => s.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+        
+        const finalInput = cleanStr(rawInput);
+        const finalPassage = cleanStr(passage);
 
-        const normalizedInp = cleanText(rawInput);
-        const normalizedPassage = cleanText(passage);
-
-        const pWords = normalizedPassage.split(/\s+/);
-        const iWords = normalizedInp.split(/\s+/);
+        // শব্দ বিভাজন (বিজয় ৫২ এর ক্ষেত্রে স্ট্রিং ভিত্তিক সরাসরি ম্যাচিং সবথেকে কার্যকর)
+        const pWords = finalPassage.split(/\s+/);
+        const iWords = finalInput.split(/\s+/);
 
         let correctChars = 0, wrongWordsCount = 0, comparisonHTML = "";
 
+        // লজিক: হুবহু ক্যারেক্টার কোড ম্যাচিং (যেহেতু দুটিই এখন সুতন্নি এমজে কোড হিসেবে আসছে)
         pWords.forEach((word, idx) => {
             const userWord = iWords[idx] || "";
             if (userWord === word && word !== "") {
@@ -300,18 +297,20 @@
             }
         });
 
-        if(correctChars > rawInput.length) correctChars = rawInput.length;
+        // রেজাল্ট ক্যালকুলেশন
         const timeSpentSeconds = examDuration - timeLeft;
         const totalMins = examDuration / 60;
+        
+        // ৫ কি-স্ট্রোক = ১ শব্দ লজিক
         const wpm = ((rawInput.length / 5) / totalMins).toFixed(2);
         let accuracy = (rawInput.length > 0) ? (correctChars / rawInput.length) * 100 : 0;
         if(accuracy > 100) accuracy = 100;
+        
         let errorRate = (rawInput.length > 0) ? ((rawInput.length - correctChars) / rawInput.length) * 100 : 0;
         
-        const isBangla = /[\u0980-\u09FF]/.test(passage);
         document.getElementById('r-lang').innerText = "Bangla (Bijoy 52)";
-        
         const statusTag = document.getElementById('r-status');
+        
         if(parseFloat(wpm) >= minWPM && parseFloat(errorRate.toFixed(2)) <= 5.00) {
             statusTag.innerText = "PASS";
             statusTag.style.color = "var(--green)";
@@ -332,6 +331,7 @@
         document.getElementById('r-err').innerText = errorRate.toFixed(2) + "%";
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
         document.getElementById('original-text-result').innerText = passage;
+        
         showPage('page-result');
     }
 
