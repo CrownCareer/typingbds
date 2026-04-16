@@ -2,21 +2,20 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Typing Exam - Fixed</title>
+    <title>Typing Test - Bijoy Logic Fix</title>
     <style>
         :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); padding: 20px; }
         .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
-        /* ফন্ট সেটিংস: SutonnyMJ ইনস্টল থাকা জরুরি */
+        /* SutonnyMJ ফন্ট পিসিতে না থাকলে বিজয় ইনপুট ইংরেজি দেখাবে */
         #p-text, #t-input, #user-compare-text { 
-            font-family: 'SutonnyMJ', Arial, sans-serif; 
+            font-family: 'SutonnyMJ', 'Arial', sans-serif; 
             font-size: 24px; line-height: 1.8;
         }
 
         textarea { width: 100%; height: 120px; border: 2px solid var(--blue); border-radius: 8px; padding: 10px; outline: none; }
         .error-highlight { color: var(--red); text-decoration: underline; font-weight: bold; }
-        .success-text { color: black; }
         .hidden { display: none !important; }
         .btn-main { background: var(--blue); color: white; padding: 12px 40px; border: none; border-radius: 5px; cursor: pointer; }
     </style>
@@ -28,7 +27,7 @@
         <div id="p-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
     </div>
     <div class="box">
-        <textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ করুন..." oninput="startTimer()"></textarea>
+        <textarea id="t-input" placeholder="বিজয় ক্লাসিক (SutonnyMJ) মোডে টাইপ করুন..."></textarea>
     </div>
     <div style="text-align: right;">
         <button class="btn-main" style="background: var(--green);" onclick="finishExam()">Go to Finish</button>
@@ -44,10 +43,9 @@
 
 <script>
     const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let timerOn = false;
 
-    // ১. পাওয়ারফুল ম্যাপিং ইঞ্জিন: যা কিবোর্ডের ইংরেজি ইনপুটকে বাংলায় রূপান্তর করবে
-    function fixBijoySequence(str) {
+    // এই ফাংশনটি বিজয় ক্লাসিকের 'এ-কার' বা 'ই-কার' এর পজিশন ইউনিকোড অনুযায়ী ঠিক করবে
+    function fixBijoyForComparison(str) {
         if (!str) return "";
         const map = {
             'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
@@ -55,21 +53,19 @@
             '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০'
         };
 
-        let output = "";
+        let result = "";
         for (let i = 0; i < str.length; i++) {
             let cur = str[i], nxt = str[i+1];
-            // ই-কার (d) বা এ-কার (c) আগে থাকলে তা বর্ণের পরে নিয়ে আসা
+            // বিজয় লেআউটে কার-চিহ্ন আগে বসে, কিন্তু ইউনিকোডে পরে। তাই পজিশন অদলবদল করা প্রয়োজন।
             if (['d', 'c', 'C'].includes(cur) && nxt) {
-                output += (map[nxt] || nxt) + (map[cur] || cur);
+                result += (map[nxt] || nxt) + (map[cur] || cur);
                 i++;
             } else {
-                output += map[cur] || cur;
+                result += map[cur] || cur;
             }
         }
-        return output.normalize('NFC').trim();
+        return result.normalize('NFC').trim();
     }
-
-    function startTimer() { timerOn = true; }
 
     function finishExam() {
         const rawInput = document.getElementById('t-input').value;
@@ -81,18 +77,20 @@
 
         pWords.forEach((word, idx) => {
             const userRaw = iWords[idx] || "";
-            const convertedUser = fixBijoySequence(userRaw);
-            const targetWord = word.normalize('NFC').trim();
+            const converted = fixBijoyForComparison(userRaw);
+            const target = word.normalize('NFC').trim();
 
-            if (convertedUser === targetWord && targetWord !== "") {
-                comparisonHTML += `<span class="success-text">${userRaw} </span>`;
+            // এখানে সরাসরি কনভার্টেড টেক্সটের সাথে প্যাসেজের তুলনা হচ্ছে
+            if (converted === target && target !== "") {
+                comparisonHTML += `<span style="color: black;">${userRaw} </span>`;
                 correctCount++;
             } else if (userRaw !== "") {
                 comparisonHTML += `<span class="error-highlight">${userRaw}</span> `;
             }
         });
 
-        document.getElementById('res-stats').innerText = `WPM: ${Math.round(rawInput.length/5)} | Accuracy: ${((correctCount/pWords.length)*100).toFixed(2)}%`;
+        const acc = ((correctCount / pWords.length) * 100).toFixed(2);
+        document.getElementById('res-stats').innerText = `গতি: ${Math.round(rawInput.length/5)} WPM | নির্ভুলতা: ${acc}%`;
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
         document.getElementById('page-exam').classList.add('hidden');
         document.getElementById('page-result').classList.remove('hidden');
