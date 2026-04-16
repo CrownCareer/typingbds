@@ -2,245 +2,128 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCC Typing Test Simulator | Project Fair 2026</title>
+    <title>BCC Proficiency Test - Project Edition</title>
     <style>
-        :root {
-            --bcc-blue: #1a73e8;
-            --bcc-dark: #202124;
-            --success: #1e7e34;
-            --error: #d93025;
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
+        .test-container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+        
+        /* সুতন্বীএমজে ফন্ট ল্যাপটপে থাকলে এটি হুবহু পরীক্ষার হলের মতো দেখাবে */
+        #passage-box, #typing-input { 
+            font-family: 'SutonnyMJ', 'SolaimanLipi', Arial; 
+            font-size: 26px; line-height: 1.6; text-align: left;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #f1f3f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* হেডার স্টাইল */
-        .header {
-            width: 100%;
-            background: var(--bcc-blue);
-            color: white;
-            padding: 15px 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            background: white;
-            margin-top: 20px;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-
-        /* স্ট্যাটাস সেকশন */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #dadce0;
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--bcc-blue);
-        }
-
-        /* প্যাসেজ এরিয়া - এখানে সুতন্বীএমজে থাকলে ভালো দেখাবে */
-        #passage-display {
-            font-family: 'SutonnyMJ', 'SolaimanLipi', serif;
-            font-size: 26px;
-            line-height: 1.6;
-            background: #fff9c4;
-            padding: 20px;
-            border: 1px solid #ffe082;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            user-select: none;
-            color: #333;
-        }
-
-        /* টাইপিং এরিয়া */
-        textarea {
-            width: 100%;
-            height: 180px;
-            font-family: 'SutonnyMJ', serif;
-            font-size: 26px;
-            padding: 15px;
-            border: 2px solid #dadce0;
-            border-radius: 5px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            border-color: var(--bcc-blue);
-        }
-
-        /* রেজাল্ট সেকশন */
-        #result-panel {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            border-top: 2px dashed #ccc;
-        }
-
-        .correct { color: #000; }
-        .wrong { color: var(--error); text-decoration: underline; font-weight: bold; }
-
-        .footer {
-            margin-top: 25px;
-            text-align: right;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn-finish { background: var(--success); color: white; }
-        .btn-reset { background: #5f6368; color: white; margin-right: 10px; }
-        .btn:hover { opacity: 0.9; }
+        #passage-box { background: #fff9c4; padding: 20px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 20px; user-select: none; }
+        
+        textarea { width: 100%; height: 150px; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; outline: none; box-sizing: border-box; }
+        
+        .stats { display: flex; justify-content: space-around; margin: 20px 0; background: #202124; color: white; padding: 15px; border-radius: 8px; }
+        .btn { background: #28a745; color: white; padding: 12px 35px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        .correct { color: #28a745; }
+        .wrong { color: #d93025; text-decoration: underline; font-weight: bold; }
+        #result-box { display: none; margin-top: 20px; text-align: left; border-top: 2px dashed #ccc; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>BCC Typing Proficiency Test - Simulator</h1>
-</div>
-
-<div class="container">
-    <div class="stats-bar">
-        <div class="stat-card">সময় বাকি <span id="timer">০৫:০০</span></div>
-        <div class="stat-card">গতি (WPM) <span id="wpm-display">০</span></div>
-        <div class="stat-card">নির্ভুলতা (%) <span id="acc-display">০</span></div>
+<div class="test-container">
+    <h2>কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
+    
+    <div class="stats">
+        <div>সময় বাকি: <span id="timer">০৫:০০</span></div>
+        <div>গতি (WPM): <span id="wpm">০</span></div>
+        <div>নির্ভুলতা: <span id="accuracy">০</span>%</div>
     </div>
 
-    <div id="passage-display">
-        ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
+    <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+
+    <textarea id="typing-input" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে এখানে টাইপ করুন..." oninput="startTimer()"></textarea>
+
+    <div style="margin-top: 20px;">
+        <button class="btn" onclick="processFinalResult()">ফিনিশ পরীক্ষা</button>
     </div>
 
-    <textarea id="typing-input" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) মোডে টাইপ শুরু করুন..." oninput="initTest()"></textarea>
-
-    <div class="footer">
-        <button class="btn btn-reset" onclick="location.reload()">রিসেট</button>
-        <button class="btn btn-finish" onclick="calculateResult()">পরীক্ষা শেষ করুন</button>
-    </div>
-
-    <div id="result-panel">
-        <h2 style="color: var(--bcc-blue)">আপনার পারফরম্যান্স রিপোর্ট:</h2>
-        <div id="analysis-box" style="font-family: 'SutonnyMJ'; font-size: 24px; line-height: 1.8; background: #fdfdfd; padding: 15px; border: 1px solid #eee;"></div>
+    <div id="result-box">
+        <h3 style="color:#1a73e8">টাইপিং বিশ্লেষণ:</h3>
+        <div id="analysis-text"></div>
     </div>
 </div>
 
 <script>
-    const passageText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let isRunning = false;
-    let secondsLeft = 300;
-    let timerId;
+    const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    let timerOn = false;
+    let timeLeft = 300;
 
-    // বিজয় ক্লাসিক ম্যাপিং ইঞ্জিন (BCC Logic)
-    function bccMapper(raw) {
-        if (!raw) return "";
-        const map = {
-            'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
-            'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
-            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০'
+    // বিসিসি লজিক: এটি বিজয় কিবোর্ডের ইংরেজি সংকেতকে বাংলায় রূপান্তর করে মেলায়
+    function bccSmartConverter(str) {
+        if (!str) return "";
+        const bijoyMap = {
+            'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
+            'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ক্ষ','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
+            '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০'
         };
 
-        let result = "";
-        for (let i = 0; i < raw.length; i++) {
-            let current = raw[i], next = raw[i+1];
-            // ই-কার (d), এ-কার (c) এর লজিক ফিক্স
-            if (['d', 'c', 'C'].includes(current) && next) {
-                result += (map[next] || next) + (map[current] || current);
+        let output = "";
+        for (let i = 0; i < str.length; i++) {
+            let ch = str[i], next = str[i+1];
+            // ই-কার (d), এ-কার (c) পজিশন ঠিক করা (বিজয় টু ইউনিকোড লজিক)
+            if ((ch === 'd' || ch === 'c' || ch === 'C') && next) {
+                output += (bijoyMap[next] || next) + (bijoyMap[ch] || ch);
                 i++;
             } else {
-                result += map[current] || current;
+                output += bijoyMap[ch] || ch;
             }
         }
-        return result.normalize('NFC').replace(/র‌্য/g, 'র্য');
+        // র্য এবং অন্যান্য যুক্তবর্ণ নরমালাইজেশন
+        return output.normalize('NFC').replace(/র‌্য/g, 'র্য');
     }
 
-    function initTest() {
-        if (!isRunning) {
-            isRunning = true;
-            timerId = setInterval(() => {
-                secondsLeft--;
-                updateTimerDisplay();
-                if (secondsLeft <= 0) {
-                    clearInterval(timerId);
-                    calculateResult();
-                }
+    function startTimer() {
+        if (!timerOn) {
+            timerOn = true;
+            let countdown = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '০'+s : s}`;
+                if (timeLeft <= 0) { clearInterval(countdown); processFinalResult(); }
             }, 1000);
         }
     }
 
-    function updateTimerDisplay() {
-        let m = Math.floor(secondsLeft / 60);
-        let s = secondsLeft % 60;
-        document.getElementById('timer').innerText = `${m < 10 ? '০'+m : m}:${s < 10 ? '০'+s : s}`;
-    }
-
-    function calculateResult() {
-        clearInterval(timerId);
-        const userInput = document.getElementById('typing-input').value.trim();
-        const uWords = userInput.split(/\s+/);
-        const pWords = passageText.split(/\s+/);
+    function processFinalResult() {
+        const inputVal = document.getElementById('typing-input').value.trim();
+        const inputWords = inputVal.split(/\s+/);
+        const targetWords = passage.split(/\s+/);
         
-        let correctCount = 0;
-        let analysisHTML = "";
+        let correctWords = 0;
+        let resultHTML = "";
 
-        pWords.forEach((targetWord, index) => {
-            let userRaw = uWords[index] || "";
-            let userConverted = bccMapper(userRaw);
-            let targetNormalized = targetWord.normalize('NFC').trim();
+        targetWords.forEach((tWord, index) => {
+            let uWordRaw = inputWords[index] || "";
+            // যদি ইউনিকোডে না মেলে, তবে বিজয় টু ইউনিকোড কনভার্ট করে চেক করো
+            let uWordConverted = bccSmartConverter(uWordRaw);
+            let targetNormalized = tWord.normalize('NFC').trim();
 
-            if (userConverted === targetNormalized && targetNormalized !== "") {
-                analysisHTML += `<span class="correct">${userRaw} </span>`;
-                correctCount++;
-            } else if (userRaw !== "") {
-                analysisHTML += `<span class="wrong">${userRaw}</span> `;
+            if (uWordConverted === targetNormalized || uWordRaw === targetNormalized) {
+                if (uWordRaw !== "") {
+                    resultHTML += `<span class="correct">${uWordRaw} </span>`;
+                    correctWords++;
+                }
+            } else if (uWordRaw !== "") {
+                resultHTML += `<span class="wrong">${uWordRaw}</span> `;
             }
         });
 
-        // গতি এবং নির্ভুলতা ক্যালকুলেশন
-        const timeSpentMin = (300 - secondsLeft) / 60;
-        const wpm = Math.round((userInput.length / 5) / timeSpentMin) || 0;
-        const accuracy = ((correctCount / pWords.length) * 100).toFixed(2);
+        const accuracy = ((correctWords / targetWords.length) * 100).toFixed(2);
+        const wpm = Math.round((inputVal.length / 5) / ((300 - timeLeft) / 60)) || 0;
 
-        document.getElementById('wpm-display').innerText = wpm;
-        document.getElementById('acc-display').innerText = accuracy;
-        document.getElementById('analysis-box').innerHTML = analysisHTML;
-        document.getElementById('result-panel').style.display = "block";
+        document.getElementById('wpm').innerText = wpm;
+        document.getElementById('accuracy').innerText = accuracy;
+        document.getElementById('analysis-text').innerHTML = resultHTML;
+        document.getElementById('result-box').style.display = "block";
         document.getElementById('typing-input').disabled = true;
-        
-        window.scrollTo(0, document.body.scrollHeight);
     }
 </script>
 
