@@ -2,14 +2,13 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Standard Typing Fix - Final</title>
+    <title>BCC Standard Typing Simulator</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
-        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; text-align: center; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* সুতন্বী ফন্ট থাকলে হুবহু পরীক্ষার হলের মতো দেখাবে */
         #passage-box, #typing-area, #analysis { 
-            font-family: 'SutonnyMJ', 'SolaimanLipi', Arial; 
+            font-family: 'SutonnyMJ', Arial; 
             font-size: 26px; line-height: 1.6; text-align: left;
         }
         
@@ -17,7 +16,7 @@
         textarea { width: 100%; height: 180px; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; outline: none; box-sizing: border-box; }
         
         .stats-bar { display: flex; justify-content: space-around; background: #333; color: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-weight: bold; font-size: 20px; }
-        .correct { color: #28a745 !important; font-weight: bold; border-bottom: 2px solid #28a745; }
+        .correct { color: #28a745 !important; font-weight: bold; }
         .wrong { color: #d93025; text-decoration: underline; font-weight: bold; }
         #analysis { margin-top: 30px; border-top: 2px dashed #eee; padding-top: 20px; }
     </style>
@@ -25,7 +24,7 @@
 <body>
 
 <div class="container">
-    <h2 style="color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
+    <h2 style="color: #1a73e8;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
     
     <div class="stats-bar">
         <div>নির্ভুলতা: <span id="accuracy">০.০০</span>%</div>
@@ -34,7 +33,7 @@
 
     <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
 
-    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) মোডে টাইপ শুরু করুন..." oninput="bccFinalEngine()"></textarea>
+    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে টাইপ করুন..." oninput="bccFinalEngine()"></textarea>
 
     <div id="analysis"></div>
 </div>
@@ -42,20 +41,20 @@
 <script>
     const targetPassage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
 
-    // বিসিসি আলটিমেট ডিকোডার - যা আপনার সব লাল শব্দকে সবুজ করবে
     function bccDecoder(str) {
         if (!str) return "";
+        // বিসিসি স্ট্যান্ডার্ড ম্যাপিং (ANSI to Unicode)
         const m = {
             'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
             'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ও','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
             '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০',
-            '‡':'ে','†':'ে','v':'া','i':'ি','`':'্য','´':'্য','I':'ও'
+            '‡':'ে','†':'ে','v':'া','i':'ি','`':'্য','´':'্য','I':'ও','x':'ও'
         };
 
         let res = "";
         for (let i = 0; i < str.length; i++) {
             let cur = str[i], nxt = str[i+1];
-            // কার-চিহ্ন পজিশন শিফটিং (ে, ি, ৈ) - বিজয় লেআউট ফিক্স
+            // কার-চিহ্ন পজিশন শিফটিং (বিজয় ক্লাসিকের জন্য আবশ্যক)
             if (['d', '‡', '†', 'c', 'C', 'i'].includes(cur) && nxt) {
                 res += (m[nxt] || nxt) + (m[cur] || cur);
                 i++;
@@ -79,7 +78,7 @@
             let decoded = bccDecoder(raw);
             let target = word.normalize('NFC').trim();
 
-            // ডুয়াল চেক: সরাসরি মিললে অথবা ডিকোড করে মিললে সঠিক (সবুজ)
+            // ডুয়াল লেয়ার চেকিং - এবার আর ভুল হবে না
             if ((decoded === target || raw === target) && target !== "") {
                 html += `<span class="correct">${raw} </span>`;
                 correctCount++;
@@ -88,7 +87,6 @@
             }
         });
 
-        // রেজাল্ট আপডেট
         const acc = ((correctCount / pWords.length) * 100).toFixed(2);
         document.getElementById('accuracy').innerText = acc;
         document.getElementById('correct-count').innerText = correctCount;
