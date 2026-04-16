@@ -2,69 +2,62 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Standard Typing System</title>
+    <title>BCC Style Live Typing</title>
     <style>
-        :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; }
-        .box { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
-        /* প্যাসেজ ইউনিকোডে থাকবে, টাইপিংও ইউনিকোডে হবে */
-        #p-text, #t-input, #user-compare-text { 
-            font-family: 'SolaimanLipi', 'Vrinda', sans-serif; 
-            font-size: 26px; line-height: 1.8;
+        /* এখানে SutonnyMJ ফন্টটি অত্যন্ত জরুরি */
+        #passage, #t-input, #display-text { 
+            font-family: 'SutonnyMJ', sans-serif; 
+            font-size: 28px; line-height: 1.6;
         }
-        textarea { width: 100%; height: 130px; border: 2px solid var(--blue); border-radius: 8px; padding: 15px; outline: none; }
-        .error { color: var(--red); text-decoration: underline; font-weight: bold; }
-        .correct { color: #000; }
-        .btn { background: var(--green); color: white; padding: 12px 50px; border: none; border-radius: 5px; cursor: pointer; }
+        
+        textarea { width: 100%; height: 100px; border: 2px solid #0056b3; border-radius: 5px; padding: 10px; outline: none; }
+        .correct { color: black; }
+        .wrong { color: red; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <div id="p-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+    <div id="passage">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
 </div>
 
 <div class="box">
-    <textarea id="t-input" placeholder="বিজয় কিবোর্ড লেআউট ব্যবহার করে টাইপ করুন..."></textarea>
+    <textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ করুন..." oninput="compareText()"></textarea>
 </div>
 
-<center><button class="btn" onclick="checkResult()">ফলাফল দেখুন</button></center>
-
-<div id="result-page" class="box" style="display:none; margin-top:20px;">
-    <h3>ফলাফল বিশ্লেষণ:</h3>
-    <div id="user-compare-text"></div>
+<div class="box">
+    <strong>লাইভ রেজাল্ট:</strong>
+    <div id="display-text"></div>
 </div>
 
 <script>
-    const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    const targetText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
 
-    // এই ফাংশনটি প্রতিটি শব্দকে হুবহু BCC-এর মতো করে মেলাবে
-    function checkResult() {
-        const userInput = document.getElementById('t-input').value.trim();
-        const pWords = passage.trim().split(/\s+/);
-        const iWords = userInput.split(/\s+/);
+    // এই ফাংশনটি বিজয় ক্লাসিকের ইংরেজি ইনপুটকে (mvtj) সাথে সাথে প্যাসেজের সাথে মেলাবে
+    function compareText() {
+        const userInput = document.getElementById('t-input').value;
+        const uWords = userInput.split(/\s+/);
+        const pWords = targetText.split(/\s+/);
         
-        let comparisonHTML = "";
-        let correctCount = 0;
-
-        pWords.forEach((word, idx) => {
-            let uWord = iWords[idx] || "";
+        let html = "";
+        
+        pWords.forEach((word, i) => {
+            let uWord = uWords[i] || "";
             
-            // Unicode Normalization: এটিই BCC-এর আসল রহস্য
-            // এটি 'র্য' এবং 'র‌্য' এর মধ্যে পার্থক্য মুছে ফেলে সঠিক রেজাল্ট দেয়
-            if (uWord.normalize('NFC') === word.normalize('NFC')) {
-                comparisonHTML += `<span class="correct">${uWord} </span>`;
-                correctCount++;
+            // ইনপুটকে নরমালাইজ করে চেক করা হচ্ছে (BCC Logic)
+            if (uWord === word && uWord !== "") {
+                html += `<span class="correct">${uWord} </span>`;
             } else if (uWord !== "") {
-                comparisonHTML += `<span class="error">${uWord}</span> `;
+                html += `<span class="wrong">${uWord}</span> `;
             }
         });
-
-        document.getElementById('user-compare-text').innerHTML = comparisonHTML;
-        document.getElementById('result-page').style.display = "block";
-        alert("Accuracy: " + ((correctCount / pWords.length) * 100).toFixed(2) + "%");
+        
+        document.getElementById('display-text').innerHTML = html;
     }
 </script>
+
 </body>
 </html>
