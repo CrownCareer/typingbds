@@ -2,130 +2,101 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Official Typing Exam - Final Pro Fix</title>
+    <title>Typing Exam - Fixed</title>
     <style>
         :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); padding: 20px; }
         .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
-        /* ফন্ট সেটিংস: সুতন্বীএমজে ফন্ট পিসিতে ইনস্টল থাকতে হবে */
-        #passage-stable, #t-input, #user-compare-text { 
-            font-family: 'SutonnyMJ', 'Arial', sans-serif; 
-            font-size: 26px;
-            line-height: 1.8;
+        /* ফন্ট সেটিংস: SutonnyMJ ইনস্টল থাকা জরুরি */
+        #p-text, #t-input, #user-compare-text { 
+            font-family: 'SutonnyMJ', Arial, sans-serif; 
+            font-size: 24px; line-height: 1.8;
         }
 
-        #t-input { width: 100%; height: 120px; border: 2px solid var(--blue); border-radius: 8px; padding: 10px; outline: none; resize: none; }
+        textarea { width: 100%; height: 120px; border: 2px solid var(--blue); border-radius: 8px; padding: 10px; outline: none; }
         .error-highlight { color: var(--red); text-decoration: underline; font-weight: bold; }
+        .success-text { color: black; }
         .hidden { display: none !important; }
-        .btn-main { background: var(--blue); color: white; padding: 12px 40px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-main { background: var(--blue); color: white; padding: 12px 40px; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="page-exam">
-    <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
-        <div>👤 পরীক্ষার্থী: <b>Emrul Kayes</b></div>
-        <div style="color: var(--red); font-size: 22px;">সময়: <span id="timer">05:00</span></div>
-    </div>
-    
-    <div id="passage-stable" class="box">
-        ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
-    </div>
-
     <div class="box">
-        <textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ শুরু করুন..." oninput="startTimer()"></textarea>
+        <div id="p-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
     </div>
-
+    <div class="box">
+        <textarea id="t-input" placeholder="বিজয় ক্লাসিক মোডে টাইপ করুন..." oninput="startTimer()"></textarea>
+    </div>
     <div style="text-align: right;">
         <button class="btn-main" style="background: var(--green);" onclick="finishExam()">Go to Finish</button>
     </div>
 </div>
 
 <div id="page-result" class="box hidden">
-    <h2 style="color: var(--blue); text-align: center;">টাইপিং ফলাফল</h2>
-    <div style="display: flex; justify-content: space-around; font-size: 20px; margin-bottom: 20px; padding: 15px; background: #eef2f3; border-radius: 8px;">
-        <div>WPM: <b id="r-wpm" style="color: var(--green);">0</b></div>
-        <div>Accuracy: <b id="r-acc" style="color: var(--blue);">0%</b></div>
-    </div>
+    <h2 style="text-align: center; color: var(--blue);">টাইপিং ফলাফল</h2>
+    <div id="res-stats" style="text-align:center; font-size: 20px; margin-bottom: 20px;"></div>
     <div id="user-compare-text" class="box" style="background: #f9f9f9;"></div>
     <center><button class="btn-main" onclick="location.reload()">আবার চেষ্টা করুন</button></center>
 </div>
 
 <script>
     const passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let timeLeft = 300, timerOn = false, timerInt;
+    let timerOn = false;
 
-    // ১. পাওয়ারফুল কনভার্টার: যা যুক্তবর্ণ ও কার-চিহ্নের পজিশন ঠিক করবে
-    function fixBijoyLogic(str) {
+    // ১. পাওয়ারফুল ম্যাপিং ইঞ্জিন: যা কিবোর্ডের ইংরেজি ইনপুটকে বাংলায় রূপান্তর করবে
+    function fixBijoySequence(str) {
         if (!str) return "";
         const map = {
             'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
             'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
-            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '&':'ষ', '`':'~'
+            '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০'
         };
 
         let output = "";
-        let i = 0;
-        while (i < str.length) {
-            let cur = str[i];
-            let nxt = str[i+1];
-            
-            // ই-কার, এ-কার এর পজিশন ইউনিকোড অনুযায়ী পরিবর্তন
+        for (let i = 0; i < str.length; i++) {
+            let cur = str[i], nxt = str[i+1];
+            // ই-কার (d) বা এ-কার (c) আগে থাকলে তা বর্ণের পরে নিয়ে আসা
             if (['d', 'c', 'C'].includes(cur) && nxt) {
                 output += (map[nxt] || nxt) + (map[cur] || cur);
-                i += 2;
+                i++;
             } else {
                 output += map[cur] || cur;
-                i++;
             }
         }
         return output.normalize('NFC').trim();
     }
 
-    function startTimer() {
-        if (!timerOn) {
-            timerOn = true;
-            timerInt = setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft/60), s = timeLeft%60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                if (timeLeft <= 0) finishExam();
-            }, 1000);
-        }
-    }
+    function startTimer() { timerOn = true; }
 
     function finishExam() {
-        clearInterval(timerInt);
         const rawInput = document.getElementById('t-input').value;
         const iWords = rawInput.trim().split(/\s+/);
         const pWords = passage.trim().split(/\s+/);
 
-        let correctChars = 0;
+        let correctCount = 0;
         let comparisonHTML = "";
 
         pWords.forEach((word, idx) => {
             const userRaw = iWords[idx] || "";
-            const converted = fixBijoyLogic(userRaw);
-            const target = word.normalize('NFC').trim();
+            const convertedUser = fixBijoySequence(userRaw);
+            const targetWord = word.normalize('NFC').trim();
 
-            if (converted === target && target !== "") {
-                comparisonHTML += `<span style="color: black;">${userRaw} </span>`;
-                correctChars += word.length + 1;
+            if (convertedUser === targetWord && targetWord !== "") {
+                comparisonHTML += `<span class="success-text">${userRaw} </span>`;
+                correctCount++;
             } else if (userRaw !== "") {
                 comparisonHTML += `<span class="error-highlight">${userRaw}</span> `;
             }
         });
 
-        const totalChars = rawInput.length || 1;
-        document.getElementById('r-wpm').innerText = Math.round((rawInput.length / 5) / ( (300 - timeLeft) / 60 || 1));
-        document.getElementById('r-acc').innerText = Math.min(100, ((correctChars / totalChars) * 100)).toFixed(2) + "%";
+        document.getElementById('res-stats').innerText = `WPM: ${Math.round(rawInput.length/5)} | Accuracy: ${((correctCount/pWords.length)*100).toFixed(2)}%`;
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
-        
         document.getElementById('page-exam').classList.add('hidden');
         document.getElementById('page-result').classList.remove('hidden');
     }
 </script>
-
 </body>
 </html>
