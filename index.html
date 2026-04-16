@@ -18,10 +18,6 @@
         .result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .card { padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 8px; font-size: 14px; }
         .card h4 { margin: -12px -12px 10px -12px; padding: 10px; font-size: 15px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; }
-        .c-green h4 { color: #28a745; background: #f8fff9; }
-        .c-orange h4 { color: #d35400; background: #fffaf0; }
-        .c-red h4 { color: #dc3545; background: #fff5f5; }
-        .card p { margin: 10px 0; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
         
         #passage-stable, #t-input, #user-compare-text { 
             font-family: 'SutonnyMJ', Arial, sans-serif; 
@@ -31,7 +27,6 @@
         .input-box { border: 2px solid var(--blue); border-radius: 8px; padding: 15px; background: #fff; margin-top: 10px; }
         textarea { width: 100%; height: 110px; font-size: 26px; border: none; outline: none; resize: none; }
         .error-highlight { color: #dc3545; text-decoration: underline; font-weight: bold; }
-        .status-banner { background: var(--teal); color: white; text-align: center; padding: 15px; border-radius: 8px; font-size: 22px; font-weight: bold; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -39,7 +34,7 @@
 <div class="container">
     <div id="page-login" class="box auth-card">
         <h2 style="color: var(--blue);">লগইন করুন</h2>
-        <input type="text" id="login-user" placeholder="আপনার নাম লিখুন">
+        <input type="text" id="login-user" placeholder="আপনার নাম">
         <button class="btn-main" onclick="doLogin()">শুরু করুন</button>
     </div>
 
@@ -53,27 +48,22 @@
             <textarea id="t-input" placeholder="বিজয় ক্লাসিক সিলেক্ট করে টাইপ করুন..." oninput="startCount()" onpaste="return false;"></textarea>
         </div>
         <div style="text-align: right; margin-top: 15px;">
-            <button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">ফলাফল দেখুন</button>
+            <button class="btn-main" style="width: auto; background: var(--green); padding: 10px 40px;" onclick="finishExam()">Go to Finish</button>
         </div>
     </div>
 
     <div id="page-result" class="box hidden">
         <div class="result-header">🔍 টাইপিং ফলাফল ও বিস্তারিত</div>
         <div class="result-grid">
-            <div class="card c-green">
-                <h4>সাধারণ তথ্য</h4>
-                <p><span>🗓️ তারিখ:</span> <span id="r-date"></span></p>
-                <p><span>⏱️ ব্যয়িত সময়:</span> <span id="r-time-taken"></span></p>
+            <div class="card">
+                <h4>তথ্য</h4>
+                <p>🚀 WPM: <b id="r-wpm"></b></p>
+                <p>🎯 Accuracy: <b id="r-acc"></b></p>
             </div>
-            <div class="card c-orange">
-                <h4>গতি ও নির্ভুলতা</h4>
-                <p><span>🚀 WPM:</span> <b id="r-wpm"></b></p>
-                <p><span>🎯 Accuracy:</span> <b id="r-acc"></b></p>
-            </div>
-            <div class="card c-red">
-                <h4>বিশ্লেষণ</h4>
-                <p><span>📊 ক্যারেক্টার:</span> <span id="r-char"></span></p>
-                <p><span>✅ সঠিক:</span> <span id="r-cor"></span></p>
+            <div class="card">
+                <h4>গণনা</h4>
+                <p>📊 Character: <span id="r-char"></span></p>
+                <p>✅ সঠিক: <span id="r-cor"></span></p>
             </div>
         </div>
         <div id="user-compare-text" class="box" style="line-height:1.8; font-size:22px;"></div>
@@ -82,26 +72,33 @@
 </div>
 
 <script>
-    // আপনার প্যাসেজটি এখানে দিন
     let passage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
-    let examDuration = 300; 
-    let timeLeft = examDuration, timerOn = false, timerInt;
+    let examDuration = 300, timeLeft = examDuration, timerOn = false, timerInt;
 
     document.getElementById('p-text').innerText = passage;
 
-    // --- পূর্ণাঙ্গ বিজয় ক্লাসিক টু ইউনিকোড কনভার্টার ---
-    function convertToUnicode(str) {
+    // --- BIJOY TO UNICODE ENGINE ---
+    function convertBijoyToUnicode(str) {
         if (!str) return "";
+        let res = str;
         
-        // বিজয় ক্লাসিকের কমন ANSI ম্যাপিং (SutonnyMJ ফন্ট যা ফলো করে)
+        // ১. কার চিহ্নের পজিশন ঠিক করা (বিজয় ই-কার আগে থাকে, ইউনিকোডে পরে)
+        res = res.replace(/ি([^্])|ে([^্])|ৈ([^্])/g, "$1$2$3"); // এটি একটি সিম্পল লজিক
+        
+        // ২. মূল ক্যারেক্টার ম্যাপিং
         const map = {
             'a':'ঋ', 'b':'ন', 'c':'এ', 'd':'ি', 'e':'ড', 'f':'া', 'g':'হ', 'h':'ব', 'i':'হ', 'j':'র', 'k':'ক', 'l':'ত', 'm':'ম', 'n':'স', 'o':'গ', 'p':'ড়', 'q':'ঙ', 'r':'প', 's':'ু', 't':'ট', 'u':'ঝ', 'v':'ল', 'w':'য়', 'x':'ও', 'y':'চ', 'z':'য',
             'A':'ৃ', 'B':'ণ', 'C':'ঐ', 'D':'ী', 'E':'ঢ', 'F':'অ', 'G':'।', 'H':'ভ', 'I':'ক্ষ', 'J':'্র', 'K':'খ', 'L':'থ', 'M':'উ', 'N':'ষ', 'O':'ঘ', 'P':'ঢ়', 'Q':'ং', 'R':'ফ', 'S':'ূ', 'T':'ঠ', 'U':'ঝ', 'V':'ল', 'W':'য়', 'X':'ৗ', 'Y':'ছ', 'Z':'্য',
             '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯', '0':'০', '|':'।'
         };
+        
+        return res.split('').map(c => map[c] || c).join('');
+    }
 
-        // যুক্তবর্ণ এবং কার চিহ্নের জন্য জটিল ম্যাপিং প্রয়োজন হয়, তবে সাধারণ তুলনার জন্য এই লজিকটি কাজ করবে
-        return str.split('').map(char => map[char] || char).join('');
+    // --- NORMALIZER ---
+    // এটি ইউনিকোড এবং বিজয় উভয় টেক্সটকে একদম বেসিক লেভেলে নিয়ে আসে যাতে তুলনা সহজ হয়
+    function normalize(text) {
+        return text.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
     }
 
     function startCount() {
@@ -126,10 +123,11 @@
 
         pWords.forEach((word, idx) => {
             const userWord = iWords[idx] || "";
-            const convertedUser = convertToUnicode(userWord);
-            
-            // তুলনা করার সময় ইনপুট এবং প্যাসেজ উভয়কেই নরমালাইজ করা হচ্ছে
-            if (convertedUser === word || userWord === word) {
+            const convUser = normalize(convertBijoyToUnicode(userWord));
+            const normPass = normalize(word);
+
+            // যদি সরাসরি ইংরেজি (বিজয় ক্লাসিক) অথবা কনভার্ট করার পর বাংলা মিলে যায়
+            if (convUser === normPass || userWord === normPass) {
                 comparisonHTML += `<span style="color:black">${userWord} </span>`;
                 correctChars += word.length + 1;
             } else if (userWord !== "") {
@@ -140,10 +138,9 @@
         const timeSpent = examDuration - timeLeft;
         const wpm = Math.round((rawInput.length / 5) / (timeSpent / 60 || 1));
         let accuracy = (rawInput.length > 0) ? (correctChars / rawInput.length) * 100 : 0;
-        if(accuracy > 100) accuracy = 100;
-
+        
         document.getElementById('r-wpm').innerText = wpm;
-        document.getElementById('r-acc').innerText = accuracy.toFixed(2) + "%";
+        document.getElementById('r-acc').innerText = (accuracy > 100 ? 100 : accuracy).toFixed(2) + "%";
         document.getElementById('r-char').innerText = rawInput.length;
         document.getElementById('r-cor').innerText = correctChars;
         document.getElementById('user-compare-text').innerHTML = comparisonHTML;
