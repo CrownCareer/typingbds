@@ -2,124 +2,138 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Pro Typing Master</title>
+    <title>Crown Career | Universal Bijoy Master</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .wrapper { max-width: 950px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .admin-panel { margin-bottom: 25px; padding: 20px; background: #f8f9fa; border: 2px dashed #1a73e8; border-radius: 12px; }
-        textarea#new-source-text { width: 100%; height: 80px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; resize: none; box-sizing: border-box; }
-        button#set-text-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
+        .wrapper { max-width: 950px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; }
         
-        .box { border: 2px solid #eef0f2; border-radius: 12px; padding: 25px; margin-bottom: 25px; min-height: 120px; font-size: 26px; line-height: 1.8; background: #ffffff; color: #333; }
-        textarea#typing-input { width: 100%; height: 180px; font-size: 24px; padding: 20px; border: 2px solid #1a73e8; border-radius: 12px; outline: none; resize: none; box-sizing: border-box; }
+        .admin-panel { margin-bottom: 20px; padding: 15px; background: #eef2f7; border-radius: 10px; display: flex; flex-direction: column; gap: 10px; }
+        #new-source-text { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        #set-text-btn { padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 100px; font-size: 24px; line-height: 1.8; background: #fafafa; word-wrap: break-word; }
+        textarea#typing-input { width: 100%; height: 150px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
         
-        /* সঠিক ও ভুল হাইলাইটিং */
-        .correct { color: #2ecc71 !important; }
-        .wrong { color: #e74c3c !important; text-decoration: underline !important; background-color: rgba(231, 76, 60, 0.1); }
+        .correct { color: #2ecc71; }
+        .wrong { color: #e74c3c; text-decoration: underline; }
         .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
-        
-        .stats { display: flex; justify-content: space-around; margin-top: 30px; }
-        .stat-item { background: #e8f0fe; padding: 15px 40px; border-radius: 12px; text-align: center; color: #1a73e8; font-weight: 700; font-size: 18px; }
-        .stat-item span { display: block; font-size: 28px; }
+        .stats { display: flex; justify-content: space-around; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h1 style="text-align:center; color:#1a73e8;">Crown Career টাইপিং সিস্টেম</h1>
+    <h1>Crown Career টাইপিং মাস্টার</h1>
 
     <div class="admin-panel">
-        <textarea id="new-source-text" placeholder="অনলাইন থেকে যেকোনো বাংলা টেক্সট কপি করে এখানে পেস্ট করুন..."></textarea>
-        <button id="set-text-btn">নতুন পরীক্ষা শুরু করুন</button>
+        <textarea id="new-source-text" placeholder="অনলাইন থেকে যেকোনো বাংলা টেক্সট এখানে কপি-পেস্ট করুন (ইউনিকোডে)..."></textarea>
+        <button id="set-text-btn">টেক্সট সেট করুন</button>
     </div>
 
     <div id="display-area" class="box"></div>
     <textarea id="typing-input" spellcheck="false" placeholder="বিজয় ৫২ (Classic) মোডে এখানে টাইপ করুন..."></textarea>
     
     <div class="stats">
-        <div class="stat-item">সঠিক শব্দ<span id="correct-count">0</span></div>
-        <div class="stat-item">ভুল শব্দ<span id="wrong-count">0</span></div>
-        <div class="stat-item">Accuracy<span id="accuracy">0</span>%</div>
+        <div>সঠিক: <span id="correct-count">0</span></div>
+        <div>ভুল: <span id="wrong-count">0</span></div>
+        <div>Accuracy: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
 /**
- * ইউনিভর্সাল স্ট্রিক্ট নরমালাইজার
- * এটি বাংলায় 'ো', 'ৌ', 'ি' ইত্যাদির ইন্টারনাল কোড পার্থক্য দূর করে।
+ * ১. ইউনিভার্সাল বিজয় টু ইউনিকোড ম্যাপ
+ * এটি প্রতিটি অক্ষরকে কনভার্ট করবে, তাই নির্দিষ্ট শব্দের ওপর নির্ভর করতে হবে না।
  */
-function normalizeText(text) {
-    if (!text) return "";
-    // NFC এবং NFD এর পার্থক্য দূর করে হুবহু ক্যারেক্টার ম্যাচ নিশ্চিত করা
-    return text.normalize('NFC').replace(/\u00A0/g, " ").trim();
+const charMap = {
+    'A':'অ','Av':'আ','B':'ই','C':'ঈ','D':'উ','E':'ঊ','F':'ঋ','G':'এ','H':'ঐ','I':'ও','J':'ঔ',
+    'k':'ক','L':'খ','g':'গ','N':'ঘ','O':'ঙ','P':'চ','Q':'ছ','R':'জ','S':'ঝ','T':'ঞ',
+    'U':'ট','V':'ঠ','W':'ড','X':'ঢ','Y':'ণ','Z':'ত','a':'থ','b':'দ','c':'ধ','d':'ন',
+    'e':'প','f':'ফ','g':'ব','h':'ভ','m':'ম','n':'য','o':'র','p':'ল','q':'শ','r':'ষ','s':'স','t':'হ',
+    'u':'ড়','v':'ঢ়','w':'য়','x':'ৎ','y':'ং','z':'ঃ','`':'ঁ',
+    'v':'া','w':'ি','x':'ী','y':'ু','z':'ূ','f':'ে','‡':'ৈ','†':'ো','Š':'ৌ'
+};
+
+function convertAnsiToUni(text) {
+    if(!text) return "";
+    // সিম্পল ডাইনামিক কনভারশন
+    let result = "";
+    for(let i=0; i<text.length; i++) {
+        let char = text[i];
+        // 'Avgv‡`i' টাইপ শব্দগুলোকে হ্যান্ডেল করার জন্য বেসিক লজিক
+        result += charMap[char] || char;
+    }
+    return result;
 }
 
+// ২. সোর্স টেক্সট ম্যানেজমেন্ট
 let sourceWords = [];
 const displayArea = document.getElementById('display-area');
 const inputArea = document.getElementById('typing-input');
 const newTextInp = document.getElementById('new-source-text');
 const setBtn = document.getElementById('set-text-btn');
 
-function setupTest(text) {
-    let cleanText = normalizeText(text);
-    // অতিরিক্ত স্পেস দূর করা
-    sourceWords = cleanText.split(/\s+/).filter(w => w.length > 0);
-    
+function init(text) {
+    // সোর্স টেক্সটকে নরমালাইজ করা যাতে 'ো' কারের কোড সমস্যা না করে
+    let cleanText = text.trim().normalize('NFC');
+    sourceWords = cleanText.split(/\s+/);
     displayArea.innerHTML = sourceWords.map(word => `<span>${word}</span>`).join(' ');
     inputArea.value = "";
-    updateUI(0, 0);
+    updateStats(0, 0);
 }
 
 setBtn.addEventListener('click', () => {
-    if (newTextInp.value.trim()) {
-        setupTest(newTextInp.value);
+    if(newTextInp.value.trim() !== "") {
+        init(newTextInp.value.trim());
         newTextInp.value = "";
     }
 });
 
+// ৩. টাইপিং চেকার
 inputArea.addEventListener('input', () => {
-    let typedText = normalizeText(inputArea.value);
-    let typedWords = typedText.split(/\s+/).filter(w => w.length > 0);
+    let rawInput = inputArea.value;
+    
+    // আপনার কিবোর্ড থেকে আসা টেক্সট যদি সরাসরি বাংলা হয় (যা স্ক্রিনশটে দেখা গেছে)
+    // তবে normalize('NFC') তুলনাকে সঠিক করবে।
+    let typedText = rawInput.normalize('NFC');
+    let typedWords = typedText.trim().split(/\s+/);
 
     let correct = 0;
     let wrong = 0;
-    const spans = displayArea.querySelectorAll('span');
+    let spans = displayArea.querySelectorAll('span');
 
     spans.forEach((span, i) => {
-        let target = sourceWords[i];
-        let typed = typedWords[i];
+        let target = sourceWords[i] ? sourceWords[i].normalize('NFC') : null;
+        let typed = typedWords[i] ? typedWords[i].normalize('NFC') : null;
 
-        if (!typed) {
+        if (typed === null) {
             span.className = '';
+        } else if (typed === target) {
+            span.className = 'correct';
+            correct++;
         } else {
-            // স্ট্রিক্ট স্ট্রিং কমপ্যারিসন
-            if (typed === target) {
-                span.className = 'correct';
-                correct++;
-            } else {
-                span.className = 'wrong';
-                wrong++;
-            }
+            span.className = 'wrong';
+            wrong++;
         }
 
-        // বর্তমান পজিশন হাইলাইট
-        if (i === typedWords.length - (typedText.endsWith(' ') ? 0 : 1)) {
+        if (i === typedWords.length - 1 && typed) {
             span.classList.add('active');
         }
     });
 
-    updateUI(correct, wrong);
+    updateStats(correct, wrong);
 });
 
-function updateUI(c, w) {
+function updateStats(c, w) {
     document.getElementById('correct-count').innerText = c;
     document.getElementById('wrong-count').innerText = w;
     let total = c + w;
     document.getElementById('accuracy').innerText = total > 0 ? ((c / total) * 100).toFixed(1) : 0;
 }
 
-// ডিফল্ট টেক্সট সেটআপ
-setupTest("আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি");
+// ডিফল্ট টেক্সট
+init("আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি");
 </script>
 
 </body>
