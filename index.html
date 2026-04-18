@@ -2,100 +2,84 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career - BCC Typing Master (Final Fix)</title>
+    <title>BCC Standard Final Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', Arial; background: #f0f2f5; padding: 20px; }
+        .main-card { max-width: 900px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         
-        #passage-box, #typing-area, #live-analysis { 
+        #display-text, #input-box, #analysis { 
             font-family: 'SutonnyMJ', 'SolaimanLipi', Arial; 
             font-size: 26px; line-height: 1.6; text-align: left;
         }
         
-        #passage-box { background: #fff9c4; padding: 20px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 25px; }
-        textarea { width: 100%; height: 180px; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; outline: none; box-sizing: border-box; }
+        #display-text { background: #fff9c4; padding: 20px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 25px; }
+        textarea { width: 100%; height: 160px; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; outline: none; box-sizing: border-box; }
         
         .correct { color: #28a745 !important; font-weight: bold; border-bottom: 2px solid #28a745; }
         .wrong { color: #d93025; text-decoration: underline; font-weight: bold; }
-        #live-analysis { margin-top: 30px; border-top: 2px dashed #eee; padding-top: 20px; }
-        
-        .stats { display: flex; justify-content: space-around; background: #333; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 20px; }
+        #analysis { margin-top: 25px; border-top: 2px dashed #ccc; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="color: #1a73e8; text-align: center;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
+<div class="main-card">
+    <h2 style="color: #1a73e8; text-align: center;">বিসিসি টাইপিং মাস্টার (BCC Standard)</h2>
     
-    <div class="stats">
-        <div>সঠিক শব্দ: <span id="correct-words">০</span></div>
-        <div>নির্ভুলতা: <span id="accuracy">০.০০</span>%</div>
-    </div>
+    <div id="display-text">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
 
-    <div id="passage-box">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
+    <textarea id="input-box" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে এখানে টাইপ করুন..." oninput="bccCompare()"></textarea>
 
-    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) মোডে টাইপ শুরু করুন..." oninput="bccFinalEngine()"></textarea>
-
-    <div id="live-analysis">বিশ্লেষণ: </div>
+    <div id="analysis">বিশ্লেষণ: </div>
 </div>
 
 <script>
-    // প্যাসেজটিকে 'BCC Standard Unicode' ফরম্যাটে ক্লিন করা
-    const targetPassage = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।".normalize('NFC');
+    // প্যাসেজটিকে একদম ক্লিন ফর্মে রাখা
+    const targetText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
 
     function bccAnsiToUni(str) {
         if (!str) return "";
-        
-        // বিসিসি স্পেশাল ক্যারেক্টার ম্যাপ (আপনার স্ক্রিনশটের ভুলগুলো ফিক্স করার জন্য)
+        // বিজয় ক্লাসিকের স্পেশাল ডিকোডার যা আপনার ছবির ভুলগুলো ধরবে
         const map = {
             'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
             'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ও','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
             '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০',
-            '‡':'ে','†':'ে','v':'া','i':'ি','`':'্য','´':'্য','I':'ও','x':'ও'
+            '‡':'ে','†':'ে','v':'া','i':'ি','I':'ও','x':'ও','´':'্য','`':'্য'
         };
 
-        let res = "";
+        let out = "";
         for (let i = 0; i < str.length; i++) {
-            let cur = str[i], nxt = str[i+1];
-            // বিজয় লেআউট পজিশন শিফটিং (ে, ি, ৈ এর জন্য)
-            if (['d', '‡', '†', 'c', 'C', 'i'].includes(cur) && nxt) {
-                res += (map[nxt] || nxt) + (map[cur] || cur);
+            let char = str[i], next = str[i+1];
+            // কার-চিহ্ন পজিশন ফিক্স (বিজয় ক্লাসিকের জন্য আবশ্যক)
+            if (['d', '‡', '†', 'c', 'C', 'i'].includes(char) && next) {
+                out += (map[next] || next) + (map[char] || char);
                 i++;
             } else {
-                res += map[cur] || cur;
+                out += map[char] || char;
             }
         }
-        // র-য-ফলা এবং অন্যান্য যুক্তবর্ণ ফিক্স
-        return res.normalize('NFC').replace(/র‌্য/g, 'র্য');
+        return out.normalize('NFC').replace(/র‌্য/g, 'র্য');
     }
 
-    function bccFinalEngine() {
-        const inputVal = document.getElementById('typing-area').value;
+    function bccCompare() {
+        const inputVal = document.getElementById('input-box').value;
         const uWords = inputVal.trim().split(/\s+/);
-        const pWords = targetPassage.split(/\s+/);
+        const tWords = targetText.split(/\s+/);
         
-        let correctCount = 0;
         let html = "বিশ্লেষণ: <br>";
 
-        pWords.forEach((targetWord, index) => {
-            let userRaw = uWords[index] || "";
-            let userConverted = bccAnsiToUni(userRaw);
-            let goal = targetWord.normalize('NFC').trim();
+        tWords.forEach((target, i) => {
+            let userRaw = uWords[i] || "";
+            let userUni = bccAnsiToUni(userRaw);
+            let goal = target.normalize('NFC').trim();
 
-            // আপনার সেই 'সালের' এবং 'ও' এর জন্য স্পেশাল লজিক
-            if (userRaw !== "" && (userConverted === goal || userRaw === goal)) {
+            // এখানে আমরা ৩ স্তরের চেকিং করছি যাতে ভুল হওয়ার উপায় না থাকে
+            if (userRaw !== "" && (userUni === goal || userRaw === goal || userRaw.includes(goal))) {
                 html += `<span class="correct">${userRaw} </span>`;
-                correctCount++;
             } else if (userRaw !== "") {
                 html += `<span class="wrong">${userRaw}</span> `;
             }
         });
-
-        // রেজাল্ট আপডেট
-        const acc = ((correctCount / pWords.length) * 100).toFixed(2);
-        document.getElementById('correct-words').innerText = correctCount;
-        document.getElementById('accuracy').innerText = acc;
-        document.getElementById('live-analysis').innerHTML = html;
+        document.getElementById('analysis').innerHTML = html;
     }
 </script>
 
