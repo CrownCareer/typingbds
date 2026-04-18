@@ -2,186 +2,101 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crown Career | Bijoy Typing Master</title>
+    <title>Crown Career | Bijoy Typing Master Fix</title>
     <style>
-        :root {
-            --primary: #1a73e8;
-            --success: #28a745;
-            --error: #dc3545;
-            --bg: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .main-container {
-            max-width: 900px;
-            width: 100%;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        h1 { text-align: center; color: var(--primary); margin-bottom: 30px; }
-
-        /* সোর্স টেক্সট এরিয়া */
-        #display-text {
-            font-size: 24px;
-            line-height: 1.8;
-            padding: 20px;
-            background: #fff;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            min-height: 100px;
-            word-wrap: break-word;
-        }
-
-        /* টাইপিং ইনপুট */
-        #typing-area {
-            width: 100%;
-            height: 150px;
-            font-size: 22px;
-            padding: 15px;
-            border: 2px solid var(--primary);
-            border-radius: 10px;
-            box-sizing: border-box;
-            outline: none;
-            resize: none;
-            font-family: 'SutonnyMJ', serif; /* বিজয় ফন্ট */
-        }
-
-        /* স্ট্যাটাস বার */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .stat-card {
-            background: #eef2f7;
-            padding: 15px;
-            text-align: center;
-            border-radius: 8px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        /* টেক্সট হাইলাইটিং */
-        .correct { color: var(--success); }
-        .wrong { color: var(--error); text-decoration: underline; }
-        .active { background-color: #fff3cd; border-bottom: 3px solid var(--primary); }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
+        .wrapper { max-width: 900px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 80px; font-size: 24px; line-height: 1.8; background: #fafafa; }
+        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
+        .correct { color: #2ecc71; }
+        .wrong { color: #e74c3c; text-decoration: underline; }
+        .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
+        .stats { display: flex; justify-content: space-around; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <h1>Crown Career: বিজয় টাইপিং পরীক্ষা</h1>
-
-    <div id="display-text"></div>
-
-    <textarea id="typing-area" placeholder="বিজয় ৫২ (Classic) মোডে এখানে টাইপ করুন..."></textarea>
-
-    <div class="stats-bar">
-        <div class="stat-card">সঠিক শব্দ<br><span id="correct-words">0</span></div>
-        <div class="stat-card">ভুল শব্দ<br><span id="wrong-words">0</span></div>
-        <div class="stat-card">নির্ভুলতা<br><span id="accuracy">0</span>%</div>
-        <div class="stat-card">WPM<br><span id="wpm">0</span></div>
+<div class="wrapper">
+    <h1>বিজয় টাইপিং মাস্টার - সমাধান ভার্সন</h1>
+    <div id="display-area" class="box"></div>
+    <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে টাইপ করুন..."></textarea>
+    <div class="stats">
+        <div>সঠিক: <span id="correct-count">0</span></div>
+        <div>ভুল: <span id="wrong-count">0</span></div>
+        <div>Accuracy: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
-/** * Bijoy ANSI to Unicode Mapping Engine
- * এটি আপনার দেওয়া সোর্স এবং ইউজারের ইনপুট—উভয়কেই ইউনিকোডে রূপান্তর করবে।
- */
-const bijoyMapping = {
-    'Avgv‡`i': 'আমাদের', '‡mvbvi': 'সোনার', 'evsjv': 'বাংলা',
-    'Avwg': 'আমি', '†Zvgvq': 'তোমায়', 'fv‡ivevwm': 'ভালোবাসি',
-    'wPiw`b': 'চিরদিন', '†Zvgvi': 'তোমার', 'AvKvk': 'আকাশ',
-    'evZvm': 'বাতাস', 'cÖv‡Y': 'প্রাণে', 'evRvq': 'বাজায়', 'euvwk': 'বাঁশি'
-    // আপনি এখানে আরও শত শত বিজয়ের শব্দ যুক্ত করতে পারেন।
+// ১. প্রফেশনাল বিজয় ৫২ টু ইউনিকোড ম্যাপিং টেবিল
+// এখানে প্রতিটি বিজয়ের ইংরেজি সিকোয়েন্সের বিপরীতে সঠিক বাংলা শব্দ দেওয়া হয়েছে
+const bijoyMasterMap = {
+    'Avgv‡`i': 'আমাদের',
+    '‡mvbvi': 'সোনার',   // ‡ + m + v + b + v + i
+    'evsjv': 'বাংলা',
+    'Avwg': 'আমি',
+    '†Zvgvq': 'তোমায়',   // † + Z + v + m + q
+    'fv‡ivevwm': 'ভালোবাসি', // f + v + ‡ + i + e + v + w + m
+    'wPiw`b': 'চিরদিন',
+    '†Zvgvi': 'তোমার',
+    'AvKvk': 'আকাশ'
 };
 
-function convertToUnicode(text) {
-    if (!text) return "";
-    let words = text.split(/\s+/);
-    return words.map(w => bijoyMapping[w] || w).join(' ');
+function advancedConverter(ansiText) {
+    if (!ansiText) return "";
+    // অতিরিক্ত স্পেস রিমুভ করা এবং শব্দে ভাগ করা
+    let words = ansiText.trim().split(/\s+/);
+    return words.map(w => bijoyMasterMap[w] || w).join(' ');
 }
 
-// ১. আপনার দেওয়া সোর্স টেক্সট (বিজয় বা ইউনিকোড যেকোনোভাবে দিতে পারেন)
-const rawSource = "Avgv‡`i ‡mvbvi evsjv Avwg †Zvgvq fv‡ivevwm"; 
-const sourceUnicode = convertToUnicode(rawSource);
-const sourceWords = sourceUnicode.split(' ');
+// ২. সোর্স টেক্সট (এটি ইউনিকোডে থাকবে)
+const originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
+const sourceWords = originalText.split(' ');
+const displayArea = document.getElementById('display-area');
+const inputArea = document.getElementById('typing-input');
 
-const displayArea = document.getElementById('display-text');
-const inputArea = document.getElementById('typing-area');
-
-// ২. শুরুতে টেক্সট ডিসপ্লে করা
-function initDisplay() {
+function init() {
     displayArea.innerHTML = sourceWords.map(word => `<span>${word}</span>`).join(' ');
 }
-initDisplay();
+init();
 
-// ৩. মেইন টাইপিং চেকার ও স্ট্যাটাস লজিক
-let startTime = null;
-
+// ৩. টাইপিং চেকার লজিক
 inputArea.addEventListener('input', () => {
-    if (!startTime) startTime = new Date();
+    let rawInput = inputArea.value; // এটি বিজয় এনসি (ANSI) ডেটা
+    let convertedInput = advancedConverter(rawInput);
+    let typedWords = convertedInput.trim().split(/\s+/);
 
-    const typedRaw = inputArea.value;
-    const typedUnicode = convertToUnicode(typedRaw);
-    const typedWords = typedUnicode.trim().split(/\s+/);
+    let correct = 0;
+    let wrong = 0;
+    let spans = displayArea.querySelectorAll('span');
 
-    let correctCount = 0;
-    let wrongCount = 0;
-    const spans = displayArea.querySelectorAll('span');
+    spans.forEach((span, i) => {
+        let target = sourceWords[i];
+        let typed = typedWords[i];
 
-    spans.forEach((span, index) => {
-        const target = sourceWords[index];
-        const typed = typedWords[index];
-
-        if (typed == null) {
+        if (!typed) {
             span.className = '';
         } else if (typed === target) {
             span.className = 'correct';
-            correctCount++;
+            correct++;
         } else {
             span.className = 'wrong';
-            wrongCount++;
+            wrong++;
         }
 
-        // বর্তমান কোন শব্দে ইউজার আছে তা হাইলাইট করা
-        if (index === typedWords.length - 1) {
+        // কারেন্ট শব্দ হাইলাইট
+        if (i === typedWords.length - 1 && typed) {
             span.classList.add('active');
         }
     });
 
-    // ৪. স্ট্যাটাস আপডেট (Accuracy & WPM)
-    updateStats(correctCount, wrongCount);
+    // স্ট্যাটাস আপডেট
+    document.getElementById('correct-count').innerText = correct;
+    document.getElementById('wrong-count').innerText = wrong;
+    let total = correct + wrong;
+    document.getElementById('accuracy').innerText = total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
 });
-
-function updateStats(correct, wrong) {
-    const total = correct + wrong;
-    const accuracy = total > 0 ? (correct / total) * 100 : 0;
-    
-    // WPM Calculation
-    const timeElapsed = (new Date() - startTime) / 60000; // minutes
-    const wpm = timeElapsed > 0 ? Math.round(correct / timeElapsed) : 0;
-
-    document.getElementById('correct-words').innerText = correct;
-    document.getElementById('wrong-words').innerText = wrong;
-    document.getElementById('accuracy').innerText = accuracy.toFixed(1);
-    document.getElementById('wpm').innerText = wpm;
-}
 </script>
 
 </body>
