@@ -2,89 +2,83 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Final Typing Fix</title>
+    <title>Crown Career | Bijoy to Unicode Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; padding: 20px; }
-        .wrapper { max-width: 950px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .admin-section { background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        textarea { width: 100%; border-radius: 8px; border: 2px solid #ddd; padding: 15px; font-size: 22px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        #typing-input { border-color: #1a73e8; min-height: 140px; }
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 25px; margin: 20px 0; min-height: 100px; font-size: 26px; line-height: 1.8; background: #fafafa; word-spacing: 5px; }
-        .correct { color: #2ecc71; font-weight: bold; }
-        .wrong { color: #e74c3c; background: #ffdada; border-radius: 4px; text-decoration: underline; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; }
+        .wrapper { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; font-size: 24px; line-height: 1.8; background: #fafafa; }
+        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; box-sizing: border-box; }
+        /* বিজয় ৫২ টাইপ করার সময় স্ক্রিনে যাতে আপনি ফন্টটি সুতন্বী এর মতো দেখতে পান */
+        #typing-input { font-family: 'SutonnyMJ', 'Segoe UI', sans-serif; }
+        .correct { color: #2ecc71; }
+        .wrong { color: #e74c3c; background: #ffdada; border-radius: 4px; text-decoration: underline; }
         .active { border-bottom: 4px solid #1a73e8; background: #e8f0fe; }
-        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px; }
+        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; margin-top: 20px; }
+        .admin-panel { margin-bottom: 20px; padding: 15px; background: #eef2f7; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h2 style="text-align: center; color: #1a73e8;">বিজয় ৫২ ও ইউনিকোড টাইপিং এক্সাম</h2>
-
-    <div class="admin-section">
-        <label><b>পরীক্ষার টেক্সট এখানে দিন (যেকোনো ফরম্যাট):</b></label>
-        <textarea id="source-input" style="height: 80px; margin-top: 10px;" placeholder="এখান টেক্সট পেস্ট করে 'সেট করুন' বাটনে চাপ দিন..."></textarea>
-        <button id="set-text-btn" style="margin-top: 10px; padding: 12px 25px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">পরীক্ষা সেট করুন</button>
+    <div class="admin-panel">
+        <label><b>পরীক্ষার টেক্সট এখানে দিন:</b></label>
+        <textarea id="source-input" style="height: 60px; margin-top: 10px;" placeholder="টেক্সট পেস্ট করুন (ইউনিকোড বা বিজয়)..."></textarea>
+        <button id="set-btn" style="margin-top:10px; padding:10px 20px; cursor:pointer; background:#1a73e8; color:white; border:none; border-radius:5px;">সেট করুন</button>
     </div>
 
     <div id="display-area" class="box"></div>
-
-    <label><b>বিজয় ৫২ কিবোর্ডে টাইপ করুন:</b></label>
+    <p><b>বিজয় ৫২ কিবোর্ড দিয়ে নিচে টাইপ করুন:</b></p>
     <textarea id="typing-input" placeholder="টাইপিং শুরু করুন..."></textarea>
     
     <div class="stats">
-        <div>সঠিক শব্দ: <span id="correct-count">0</span></div>
-        <div>ভুল শব্দ: <span id="wrong-count">0</span></div>
+        <div>সঠিক: <span id="correct-count">0</span></div>
+        <div>ভুল: <span id="wrong-count">0</span></div>
         <div>নির্ভুলতা: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
-// ১. প্রফেশনাল বিজয় টু ইউনিকোড ম্যাপ
-const bijoyMap = {
+// বিজয় ৫২ ক্লাসিক টু ইউনিকোড ম্যাপ (ASCII Based)
+const bijoyToUniMap = {
     'a':'া', 'i':'ি', 'I':'ী', 'u':'ু', 'U':'ূ', 'e':'ে', 'E':'ৈ', 'o':'ো', 'O':'ৌ',
     'j':'ক', 'k':'খ', 'l':'গ', 'm':'ঘ', 'n':'ঙ', 'p':'চ', 'q':'ছ', 'r':'জ', 's':'ঝ', 't':'ঞ',
     'v':'ট', 'w':'ঠ', 'x':'ড', 'y':'ঢ', 'z':'ণ', 'A':'ত', 'B':'থ', 'C':'দ', 'D':'ধ', 'E':'ন',
     'G':'প', 'H':'ফ', 'I':'ব', 'J':'ভ', 'K':'ম', 'L':'য', 'M':'র', 'N':'ল', 'O':'শ', 'P':'ষ', 'Q':'স', 'R':'হ',
-    'S':'ড়', 'T':'ঢ়', 'U':'য়', 'V':'ৎ', 'W':'ং', 'X':'ঃ', 'Y':'ঁ', 'Z':'।', 'g':'', '&':'ষ'
+    'S':'ড়', 'T':'ঢ়', 'U':'য়', 'V':'ৎ', 'W':'ং', 'X':'ঃ', 'Y':'ঁ', 'Z':'।', 'g':'', '&':'ষ',
+    '0':'০', '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯'
 };
 
-// ২. শক্তিশালী কনভার্টার ও নরমলাইজার
-function normalizeAndConvert(text) {
+// কনভার্টার ইঞ্জিন
+function smartConvert(text) {
     if (!text) return "";
-    
-    // যদি ইনপুটটি বিজয় ASCII হয় (ইংরেজি অক্ষর থাকে), তবে কনভার্ট করবে
-    let output = "";
-    if (!/[\u0980-\u09FF]/.test(text)) {
-        for (let char of text) {
-            output += bijoyMap[char] || char;
-        }
-        output = output.replace(/ে([ক-হ])/g, '$1ে').replace(/ি([ক-হ])/g, '$1ি').replace(/ৈ([ক-হ])/g, '$1ৈ');
-    } else {
-        output = text;
-    }
+    // যদি অলরেডি বাংলা বর্ণ থাকে তবে কনভার্ট করবে না
+    if (/[\u0980-\u09FF]/.test(text)) return text.normalize('NFC').trim();
 
-    // ইউনিকোড ক্যারেক্টার নরমলাইজেশন (যাতে 'ও' এবং '০' বা বিভিন্ন টাইপের 'র' এর ঝামেলা না হয়)
-    return output.normalize('NFC').trim();
+    let converted = "";
+    for (let char of text) {
+        converted += bijoyToUniMap[char] || char;
+    }
+    // বিজয় কার চিহ্ন পজিশন ঠিক করা
+    return converted.replace(/ে([ক-হ])/g, '$1ে')
+                    .replace(/ি([ক-হ])/g, '$1ি')
+                    .replace(/ৈ([ক-হ])/g, '$1ৈ')
+                    .normalize('NFC').trim();
 }
 
 let sourceWords = [];
 const displayArea = document.getElementById('display-area');
 const typingInput = document.getElementById('typing-input');
-const sourceInput = document.getElementById('source-input');
 
-function setupTest(text) {
-    if(!text.trim()) return;
-    // সোর্স টেক্সটকেও কনভার্ট ও নরমলাইজ করা হচ্ছে
-    let cleanText = normalizeAndConvert(text);
+function init(text) {
+    let cleanText = smartConvert(text);
     sourceWords = cleanText.split(/\s+/);
     displayArea.innerHTML = sourceWords.map(w => `<span>${w}</span>`).join(' ');
     typingInput.value = "";
     updateStats(0, 0);
 }
 
-document.getElementById('set-text-btn').addEventListener('click', () => {
-    setupTest(sourceInput.value);
+document.getElementById('set-btn').addEventListener('click', () => {
+    init(document.getElementById('source-input').value);
 });
 
 typingInput.addEventListener('input', function() {
@@ -99,17 +93,17 @@ typingInput.addEventListener('input', function() {
             return;
         }
 
-        let typedConverted = normalizeAndConvert(typedRaw[i]);
-        let targetWord = sourceWords[i];
+        // আপনার টাইপ করা ইংরেজি অক্ষরগুলোকে বাংলায় কনভার্ট করে চেক করা হচ্ছে
+        let typedConverted = smartConvert(typedRaw[i]);
+        let target = sourceWords[i];
 
-        if (typedConverted === targetWord) {
+        if (typedConverted === target) {
             span.className = 'correct';
             correct++;
         } else {
             span.className = 'wrong';
             wrong++;
         }
-
         if (i === typedRaw.length - 1) span.classList.add('active');
     });
 
@@ -122,6 +116,9 @@ function updateStats(c, w) {
     let total = c + w;
     document.getElementById('accuracy').innerText = total > 0 ? ((c / total) * 100).toFixed(1) : 0;
 }
+
+// ডিফল্ট টেক্সট
+init("আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি");
 </script>
 
 </body>
