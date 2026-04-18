@@ -2,11 +2,17 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Bijoy Typing Master Final Fix</title>
+    <title>Crown Career | Bijoy Typing Master Fix</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
         .wrapper { max-width: 900px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #1a73e8; }
+        
+        /* নতুন টেক্সট সেট করার অপশন */
+        .admin-panel { margin-bottom: 20px; padding: 15px; background: #eef2f7; border-radius: 10px; display: flex; gap: 10px; }
+        #new-source-text { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        #set-text-btn { padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 80px; font-size: 24px; line-height: 1.8; background: #fafafa; }
         textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
         .correct { color: #2ecc71; }
@@ -18,9 +24,16 @@
 <body>
 
 <div class="wrapper">
-    <h1>বিজয় টাইপিং মাস্টার - ও-কার সমাধান</h1>
+    <h1>বিজয় টাইপিং মাস্টার - কাস্টম টেক্সট</h1>
+
+    <div class="admin-panel">
+        <input type="text" id="new-source-text" placeholder="এখানে পরীক্ষার নতুন টেক্সটটি দিন (ইউনিকোডে)...">
+        <button id="set-text-btn">টেক্সট সেট করুন</button>
+    </div>
+
     <div id="display-area" class="box"></div>
     <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে টাইপ করুন..."></textarea>
+    
     <div class="stats">
         <div>সঠিক: <span id="correct-count">0</span></div>
         <div>ভুল: <span id="wrong-count">0</span></div>
@@ -29,10 +42,7 @@
 </div>
 
 <script>
-/**
- * ১. ও-কার এবং অন্যান্য কার চিহ্নের জন্য উন্নত ম্যাপিং
- * এখানে ‡ (Alt+0135) এবং † (Alt+0134) উভয় ও-কার চিহ্নকে অন্তর্ভুক্ত করা হয়েছে।
- */
+// ১. প্রফেশনাল বিজয় ৫২ টু ইউনিকোড ম্যাপিং টেবিল
 const bijoyMasterMap = {
     'Avgv‡`i': 'আমাদের',
     '‡mvbvi': 'সোনার',   
@@ -51,38 +61,44 @@ const bijoyMasterMap = {
 
 function advancedConverter(ansiText) {
     if (!ansiText) return "";
-    
-    // বিজয়ের স্পেশাল ক্যারেক্টার ও স্পেস ক্লিন করা
     let words = ansiText.split(/\s+/);
-    
     return words.map(w => {
         let cleanWord = w.trim();
-        // যদি ম্যাপে সরাসরি শব্দ পাওয়া যায়
-        if (bijoyMasterMap[cleanWord]) return bijoyMasterMap[cleanWord];
-        
-        // যদি ম্যাপে না পাওয়া যায়, তবে এটি ইউনিকোড ইনপুট কিনা চেক করবে
-        return cleanWord;
+        return bijoyMasterMap[cleanWord] || cleanWord;
     }).join(' ');
 }
 
-const originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
-// মূল টেক্সটকে নরমালাইজ করা (যাতে ও-কার ভেঙ্গে না যায়)
-const sourceWords = originalText.normalize('NFC').split(' ');
+// ২. সোর্স টেক্সট ম্যানেজমেন্ট
+let originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
+let sourceWords = [];
 
 const displayArea = document.getElementById('display-area');
 const inputArea = document.getElementById('typing-input');
+const newTextInp = document.getElementById('new-source-text');
+const setBtn = document.getElementById('set-text-btn');
 
-function init() {
+function init(text) {
+    originalText = text.normalize('NFC');
+    sourceWords = originalText.split(' ');
     displayArea.innerHTML = sourceWords.map(word => `<span>${word}</span>`).join(' ');
+    inputArea.value = ""; // রিসেট টাইপিং এরিয়া
 }
-init();
 
+// প্রথমবার লোড
+init(originalText);
+
+// বাটন ক্লিক করে নতুন টেক্সট সেট করা
+setBtn.addEventListener('click', () => {
+    if(newTextInp.value.trim() !== "") {
+        init(newTextInp.value.trim());
+    }
+});
+
+// ৩. টাইপিং চেকার লজিক (অপরিবর্তিত)
 inputArea.addEventListener('input', () => {
     let rawInput = inputArea.value;
     let convertedInput = advancedConverter(rawInput);
     
-    // ২. সবচেয়ে গুরুত্বপূর্ণ অংশ: NFC Normalization
-    // এটি 'ে' + 'া' কে একত্রে 'ো' হিসেবে রূপান্তর করে
     convertedInput = convertedInput.normalize('NFC');
     let typedWords = convertedInput.trim().split(/\s+/);
 
