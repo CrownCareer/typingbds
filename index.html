@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>BCC Typing Master (Final)</title>
+<title>BCC Typing Master (Final Working)</title>
 
 <style>
 body {
@@ -20,7 +20,7 @@ body {
 }
 
 #display, textarea, #analysis, #final {
-    font-family: 'SutonnyMJ', 'SolaimanLipi';
+    font-family: 'SutonnyMJ','SolaimanLipi';
     font-size: 26px;
 }
 
@@ -85,7 +85,7 @@ button {
 }
 </style>
 
-<!-- ✅ Bijoy to Unicode লাইব্রেরি -->
+<!-- Bijoy to Unicode CDN -->
 <script src="https://cdn.jsdelivr.net/gh/forhad-bd/bijoy2unicode/bijoy2unicode.min.js"></script>
 
 </head>
@@ -114,14 +114,26 @@ button {
 
 <script>
 
+// target text
 const target = document.getElementById("display").innerText.trim();
 
+// safe converter (library fail হলেও কাজ করবে)
+function convert(text){
+    try {
+        if (typeof BijoyToUnicode === "function") {
+            return BijoyToUnicode(text);
+        }
+        return text;
+    } catch(e){
+        return text;
+    }
+}
+
+// 🔹 live typing analysis
 function run() {
 
     let input = document.getElementById("box").value;
-
-    // 🔥 Bijoy → Unicode
-    let uni = BijoyToUnicode(input).trim();
+    let uni = convert(input).trim();
 
     let tWords = target.split(/\s+/);
     let uWords = uni.split(/\s+/);
@@ -146,12 +158,11 @@ function run() {
         ((correct / tWords.length) * 100).toFixed(2);
 }
 
-
-// 🔥 Submit Button Logic
+// 🔹 submit result
 function submitTest() {
 
     let input = document.getElementById("box").value;
-    let uni = BijoyToUnicode(input).trim();
+    let uni = convert(input).trim();
 
     let tWords = target.split(/\s+/);
     let uWords = uni.split(/\s+/);
@@ -169,7 +180,7 @@ function submitTest() {
     let accuracy = ((correct / tWords.length) * 100).toFixed(2);
 
     document.getElementById("final").innerHTML = `
-        <b>ফাইনাল রেজাল্ট:</b><br><br>
+        <b>ফাইনাল রেজাল্ট</b><br><br>
         মোট শব্দ: ${tWords.length}<br>
         সঠিক: ${correct}<br>
         ভুল: ${wrong}<br>
