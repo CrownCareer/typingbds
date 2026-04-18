@@ -2,84 +2,82 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Smart Unicode Engine</title>
+    <title>Crown Career | Final Typing Fix</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; padding: 20px; }
-        .wrapper { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #1a73e8; }
+        .wrapper { max-width: 950px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .admin-section { background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        textarea { width: 100%; border-radius: 8px; border: 2px solid #ddd; padding: 15px; font-size: 20px; box-sizing: border-box; outline: none; }
-        #typing-input { border-color: #1a73e8; font-family: 'SutonnyMJ', serif; height: 120px; }
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin: 20px 0; min-height: 100px; font-size: 24px; line-height: 1.8; background: #fafafa; }
-        .correct { color: #2ecc71; }
-        .wrong { color: #e74c3c; background: #ffdada; border-radius: 4px; text-decoration: underline; }
+        textarea { width: 100%; border-radius: 8px; border: 2px solid #ddd; padding: 15px; font-size: 22px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        #typing-input { border-color: #1a73e8; min-height: 140px; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 25px; margin: 20px 0; min-height: 100px; font-size: 26px; line-height: 1.8; background: #fafafa; word-spacing: 5px; }
+        .correct { color: #2ecc71; font-weight: bold; }
+        .wrong { color: #e74c3c; background: #ffdada; border-radius: 4px; text-decoration: underline; font-weight: bold; }
         .active { border-bottom: 4px solid #1a73e8; background: #e8f0fe; }
-        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; font-weight: bold; }
+        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h1>Crown Career - স্মার্ট টাইপিং ইঞ্জিন</h1>
+    <h2 style="text-align: center; color: #1a73e8;">বিজয় ৫২ ও ইউনিকোড টাইপিং এক্সাম</h2>
 
     <div class="admin-section">
-        <label><b>এখানে পরীক্ষার টেক্সট দিন (বিজয় ৫২ বা ইউনিকোড যেকোনো ফরম্যাটে):</b></label>
-        <textarea id="source-input" style="height: 80px; margin-top: 10px;" placeholder="টেক্সট পেস্ট করুন..."></textarea>
-        <button id="set-text-btn" style="margin-top: 10px; padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer;">পরীক্ষা সেট করুন</button>
+        <label><b>পরীক্ষার টেক্সট এখানে দিন (যেকোনো ফরম্যাট):</b></label>
+        <textarea id="source-input" style="height: 80px; margin-top: 10px;" placeholder="এখান টেক্সট পেস্ট করে 'সেট করুন' বাটনে চাপ দিন..."></textarea>
+        <button id="set-text-btn" style="margin-top: 10px; padding: 12px 25px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">পরীক্ষা সেট করুন</button>
     </div>
 
-    <div id="display-area" class="box">এখানে আপনার পরীক্ষার টেক্সট দেখাবে...</div>
+    <div id="display-area" class="box"></div>
 
     <label><b>বিজয় ৫২ কিবোর্ডে টাইপ করুন:</b></label>
-    <textarea id="typing-input" placeholder="টাইপ শুরু করুন..."></textarea>
+    <textarea id="typing-input" placeholder="টাইপিং শুরু করুন..."></textarea>
     
     <div class="stats">
-        <div>সঠিক: <span id="correct-count">0</span></div>
-        <div>ভুল: <span id="wrong-count">0</span></div>
+        <div>সঠিক শব্দ: <span id="correct-count">0</span></div>
+        <div>ভুল শব্দ: <span id="wrong-count">0</span></div>
         <div>নির্ভুলতা: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
-// বিজয় ৫২ ক্লাসিক টু ইউনিকোড ম্যাপিং
+// ১. প্রফেশনাল বিজয় টু ইউনিকোড ম্যাপ
 const bijoyMap = {
     'a':'া', 'i':'ি', 'I':'ী', 'u':'ু', 'U':'ূ', 'e':'ে', 'E':'ৈ', 'o':'ো', 'O':'ৌ',
     'j':'ক', 'k':'খ', 'l':'গ', 'm':'ঘ', 'n':'ঙ', 'p':'চ', 'q':'ছ', 'r':'জ', 's':'ঝ', 't':'ঞ',
     'v':'ট', 'w':'ঠ', 'x':'ড', 'y':'ঢ', 'z':'ণ', 'A':'ত', 'B':'থ', 'C':'দ', 'D':'ধ', 'E':'ন',
     'G':'প', 'H':'ফ', 'I':'ব', 'J':'ভ', 'K':'ম', 'L':'য', 'M':'র', 'N':'ল', 'O':'শ', 'P':'ষ', 'Q':'স', 'R':'হ',
-    'S':'ড়', 'T':'ঢ়', 'U':'য়', 'V':'ৎ', 'W':'ং', 'X':'ঃ', 'Y':'ঁ', 'Z':'।', 'g':'', '&':'ষ',
-    '0':'০', '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯'
+    'S':'ড়', 'T':'ঢ়', 'U':'য়', 'V':'ৎ', 'W':'ং', 'X':'ঃ', 'Y':'ঁ', 'Z':'।', 'g':'', '&':'ষ'
 };
 
-// কনভার্টার ইঞ্জিন: যা যেকোনো ইনপুটকে ইউনিকোড করবে
-function toUnicode(text) {
+// ২. শক্তিশালী কনভার্টার ও নরমলাইজার
+function normalizeAndConvert(text) {
     if (!text) return "";
-    // যদি টেক্সটে অলরেডি বাংলা থাকে, তবে কনভার্ট করার দরকার নেই
-    if (/[\u0980-\u09FF]/.test(text)) return text.trim();
-
+    
+    // যদি ইনপুটটি বিজয় ASCII হয় (ইংরেজি অক্ষর থাকে), তবে কনভার্ট করবে
     let output = "";
-    for (let char of text) {
-        output += bijoyMap[char] || char;
+    if (!/[\u0980-\u09FF]/.test(text)) {
+        for (let char of text) {
+            output += bijoyMap[char] || char;
+        }
+        output = output.replace(/ে([ক-হ])/g, '$1ে').replace(/ি([ক-হ])/g, '$1ি').replace(/ৈ([ক-হ])/g, '$1ৈ');
+    } else {
+        output = text;
     }
-    // কার চিহ্নের পজিশন ঠিক করার লজিক
-    return output.replace(/ে([ক-হ])/g, '$1ে')
-                 .replace(/ি([ক-হ])/g, '$1ি')
-                 .replace(/ৈ([ক-হ])/g, '$1ৈ')
-                 .replace(/ো([ক-হ])/g, '$1ো');
+
+    // ইউনিকোড ক্যারেক্টার নরমলাইজেশন (যাতে 'ও' এবং '০' বা বিভিন্ন টাইপের 'র' এর ঝামেলা না হয়)
+    return output.normalize('NFC').trim();
 }
 
 let sourceWords = [];
-
 const displayArea = document.getElementById('display-area');
 const typingInput = document.getElementById('typing-input');
 const sourceInput = document.getElementById('source-input');
 
-// পরীক্ষা সেটআপ করার ফাংশন
 function setupTest(text) {
-    // ১. আপনার দেয়া টেক্সটকে আগে ইউনিকোডে রূপান্তর করা হচ্ছে
-    let unicodeSource = toUnicode(text);
-    sourceWords = unicodeSource.split(/\s+/);
-    
+    if(!text.trim()) return;
+    // সোর্স টেক্সটকেও কনভার্ট ও নরমলাইজ করা হচ্ছে
+    let cleanText = normalizeAndConvert(text);
+    sourceWords = cleanText.split(/\s+/);
     displayArea.innerHTML = sourceWords.map(w => `<span>${w}</span>`).join(' ');
     typingInput.value = "";
     updateStats(0, 0);
@@ -89,7 +87,6 @@ document.getElementById('set-text-btn').addEventListener('click', () => {
     setupTest(sourceInput.value);
 });
 
-// টাইপিং চেক করার লজিক
 typingInput.addEventListener('input', function() {
     let typedRaw = this.value.split(/\s+/);
     let spans = displayArea.querySelectorAll('span');
@@ -102,11 +99,10 @@ typingInput.addEventListener('input', function() {
             return;
         }
 
-        // ২. আপনার টাইপ করা বিজয় টেক্সটকেও ইউনিকোডে রূপান্তর করে চেক করা হচ্ছে
-        let typedUnicode = toUnicode(typedRaw[i]);
-        let targetUnicode = sourceWords[i];
+        let typedConverted = normalizeAndConvert(typedRaw[i]);
+        let targetWord = sourceWords[i];
 
-        if (typedUnicode === targetUnicode) {
+        if (typedConverted === targetWord) {
             span.className = 'correct';
             correct++;
         } else {
