@@ -2,6 +2,130 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
+    <title>Crown Career | Professional Fix</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .wrapper { max-width: 950px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .admin-panel { margin-bottom: 25px; padding: 20px; background: #f8f9fa; border: 2px dashed #1a73e8; border-radius: 12px; }
+        textarea#new-source-text { width: 100%; height: 80px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; resize: none; box-sizing: border-box; }
+        button#set-text-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        
+        .box { border: 2px solid #eef0f2; border-radius: 12px; padding: 25px; margin-bottom: 25px; min-height: 120px; font-size: 26px; line-height: 1.8; background: #ffffff; color: #333; word-wrap: break-word; }
+        textarea#typing-input { width: 100%; height: 180px; font-size: 24px; padding: 20px; border: 2px solid #1a73e8; border-radius: 12px; outline: none; resize: none; box-sizing: border-box; }
+        
+        .correct { color: #2ecc71 !important; }
+        .wrong { color: #e74c3c !important; text-decoration: underline !important; background-color: rgba(231, 76, 60, 0.1); }
+        .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
+        
+        .stats { display: flex; justify-content: space-around; margin-top: 30px; }
+        .stat-item { background: #e8f0fe; padding: 15px 40px; border-radius: 12px; text-align: center; color: #1a73e8; font-weight: 700; font-size: 18px; }
+        .stat-item span { display: block; font-size: 28px; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h2 style="text-align:center; color:#1a73e8;">বিজয় টাইপিং মাস্টার - প্রফেশনাল ফিক্স</h2>
+
+    <div class="admin-panel">
+        <textarea id="new-source-text" placeholder="যেকোনো জায়গা থেকে টেক্সট কপি করে এখানে পেস্ট করুন..."></textarea>
+        <button id="set-text-btn">টেক্সট সেট করুন</button>
+    </div>
+
+    <div id="display-area" class="box"></div>
+    <textarea id="typing-input" spellcheck="false" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) মোডে টাইপ করুন..."></textarea>
+    
+    <div class="stats">
+        <div class="stat-item">সঠিক শব্দ<span id="correct-count">0</span></div>
+        <div class="stat-item">ভুল শব্দ<span id="wrong-count">0</span></div>
+        <div class="stat-item">Accuracy<span id="accuracy">0</span>%</div>
+    </div>
+</div>
+
+<script>
+/**
+ * ১. প্রফেশনাল নরমালাইজার ফাংশন
+ * এটি অনলাইন কপি করা টেক্সট এবং কিবোর্ড ইনপুটকে হুবহু এক করে দেয়।
+ */
+function superNormalize(text) {
+    if (!text) return "";
+    return text.normalize('NFC') // ও-কার এবং যুক্তবর্ণ ফিক্স
+               .replace(/[\u200B-\u200D\uFEFF]/g, "") // অদৃশ্য ক্যারেক্টার রিমুভ
+               .trim();
+}
+
+let sourceWords = [];
+const displayArea = document.getElementById('display-area');
+const inputArea = document.getElementById('typing-input');
+
+function setupTest(text) {
+    let cleanText = superNormalize(text);
+    sourceWords = cleanText.split(/\s+/).filter(w => w.length > 0);
+    
+    displayArea.innerHTML = sourceWords.map(word => `<span>${word}</span>`).join(' ');
+    inputArea.value = "";
+    updateUI(0, 0);
+}
+
+document.getElementById('set-text-btn').addEventListener('click', () => {
+    const rawText = document.getElementById('new-source-text').value;
+    if (rawText.trim()) {
+        setupTest(rawText);
+        document.getElementById('new-source-text').value = "";
+    }
+});
+
+inputArea.addEventListener('input', () => {
+    // কিবোর্ড থেকে যা টাইপ হচ্ছে সেটিকে নরমালাইজ করা
+    let typedText = superNormalize(inputArea.value);
+    let typedWords = typedText.split(/\s+/).filter(w => w.length > 0);
+
+    let correct = 0;
+    let wrong = 0;
+    const spans = displayArea.querySelectorAll('span');
+
+    spans.forEach((span, i) => {
+        let target = sourceWords[i];
+        let typed = typedWords[i];
+
+        if (!typed) {
+            span.className = '';
+        } else {
+            // হুবহু অক্ষর ম্যাচিং
+            if (typed === target) {
+                span.className = 'correct';
+                correct++;
+            } else {
+                span.className = 'wrong';
+                wrong++;
+            }
+        }
+
+        // বর্তমান শব্দ হাইলাইট
+        if (i === typedWords.length - (typedText.endsWith(' ') ? 0 : 1)) {
+            span.classList.add('active');
+        }
+    });
+
+    updateUI(correct, wrong);
+});
+
+function updateUI(c, w) {
+    document.getElementById('correct-count').innerText = c;
+    document.getElementById('wrong-count').innerText = w;
+    let total = c + w;
+    document.getElementById('accuracy').innerText = total > 0 ? ((c / total) * 100).toFixed(1) : 0;
+}
+
+// ডিফল্ট টেক্সট লোড
+setupTest("আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি");
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
     <title>Crown Career | Universal Bijoy Master</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
