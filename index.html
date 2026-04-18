@@ -2,91 +2,111 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Typing Fix</title>
+    <title>Crown Career | Smart Unicode Engine</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; }
-        .wrapper { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; font-size: 24px; line-height: 1.8; background: #fafafa; }
-        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; padding: 20px; }
+        .wrapper { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; }
+        .admin-section { background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        textarea { width: 100%; border-radius: 8px; border: 2px solid #ddd; padding: 15px; font-size: 20px; box-sizing: border-box; outline: none; }
+        #typing-input { border-color: #1a73e8; font-family: 'SutonnyMJ', serif; height: 120px; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin: 20px 0; min-height: 100px; font-size: 24px; line-height: 1.8; background: #fafafa; }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; background: #ffdada; border-radius: 4px; text-decoration: underline; }
-        .active { border-bottom: 3px solid #1a73e8; background: #e8f0fe; }
-        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; margin-top: 20px; }
-        .admin-panel { margin-bottom: 20px; padding: 15px; background: #eef2f7; border-radius: 10px; }
-        #new-source-text { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        .active { border-bottom: 4px solid #1a73e8; background: #e8f0fe; }
+        .stats { display: flex; justify-content: space-around; background: #1a73e8; color: white; padding: 15px; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <div class="admin-panel">
-        <input type="text" id="new-source-text" placeholder="পরীক্ষার টেক্সট এখানে দিন (যেকোনো জায়গা থেকে কপি করা)...">
-        <button onclick="init(document.getElementById('new-source-text').value)" style="padding: 10px 20px; cursor: pointer;">সেট করুন</button>
+    <h1>Crown Career - স্মার্ট টাইপিং ইঞ্জিন</h1>
+
+    <div class="admin-section">
+        <label><b>এখানে পরীক্ষার টেক্সট দিন (বিজয় ৫২ বা ইউনিকোড যেকোনো ফরম্যাটে):</b></label>
+        <textarea id="source-input" style="height: 80px; margin-top: 10px;" placeholder="টেক্সট পেস্ট করুন..."></textarea>
+        <button id="set-text-btn" style="margin-top: 10px; padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer;">পরীক্ষা সেট করুন</button>
     </div>
 
-    <div id="display-area" class="box"></div>
-    <textarea id="typing-input" placeholder="বিজয় ৫২ বা ইউনিকোডে টাইপ করুন..."></textarea>
+    <div id="display-area" class="box">এখানে আপনার পরীক্ষার টেক্সট দেখাবে...</div>
+
+    <label><b>বিজয় ৫২ কিবোর্ডে টাইপ করুন:</b></label>
+    <textarea id="typing-input" placeholder="টাইপ শুরু করুন..."></textarea>
     
     <div class="stats">
-        <div>সঠিক শব্দ: <span id="correct-count">0</span></div>
-        <div>ভুল শব্দ: <span id="wrong-count">0</span></div>
+        <div>সঠিক: <span id="correct-count">0</span></div>
+        <div>ভুল: <span id="wrong-count">0</span></div>
         <div>নির্ভুলতা: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
-// ১. প্রফেশনাল বিজয় টু ইউনিকোড ম্যাপ
-const bijoyToUniMap = {
-    'A': 'ত', 'B': 'থ', 'C': 'দ', 'D': 'ধ', 'E': 'ন', 'G': 'প', 'H': 'ফ', 'I': 'ব', 'J': 'ভ', 'K': 'ম', 'L': 'য', 'M': 'র', 'N': 'ল', 'O': 'শ', 'P': 'ষ', 'Q': 'স', 'R': 'হ', 'S': 'ড়', 'T': 'ঢ়', 'U': 'য়', 'V': 'ৎ', 'W': 'ং', 'X': 'ঃ', 'Y': 'ঁ', 'Z': '।', 'a': 'া', 'i': 'ি', 'I': 'ী', 'u': 'ু', 'U': 'ূ', 'e': 'ে', 'E': 'ৈ', 'o': 'ো', 'O': 'ৌ', 'j': 'ক', 'k': 'খ', 'l': 'গ', 'm': 'ঘ', 'n': 'ঙ', 'p': 'চ', 'q': 'ছ', 'r': 'জ', 's': 'ঝ', 't': 'ঞ', 'v': 'ট', 'w': 'ঠ', 'x': 'ড', 'y': 'ঢ', 'z': 'ণ', 'g': '', '&': 'ষ'
+// বিজয় ৫২ ক্লাসিক টু ইউনিকোড ম্যাপিং
+const bijoyMap = {
+    'a':'া', 'i':'ি', 'I':'ী', 'u':'ু', 'U':'ূ', 'e':'ে', 'E':'ৈ', 'o':'ো', 'O':'ৌ',
+    'j':'ক', 'k':'খ', 'l':'গ', 'm':'ঘ', 'n':'ঙ', 'p':'চ', 'q':'ছ', 'r':'জ', 's':'ঝ', 't':'ঞ',
+    'v':'ট', 'w':'ঠ', 'x':'ড', 'y':'ঢ', 'z':'ণ', 'A':'ত', 'B':'থ', 'C':'দ', 'D':'ধ', 'E':'ন',
+    'G':'প', 'H':'ফ', 'I':'ব', 'J':'ভ', 'K':'ম', 'L':'য', 'M':'র', 'N':'ল', 'O':'শ', 'P':'ষ', 'Q':'স', 'R':'হ',
+    'S':'ড়', 'T':'ঢ়', 'U':'য়', 'V':'ৎ', 'W':'ং', 'X':'ঃ', 'Y':'ঁ', 'Z':'।', 'g':'', '&':'ষ',
+    '0':'০', '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯'
 };
 
-// ২. অটো ডিটেকশন কনভার্টার
-function getSmartText(text) {
-    // যদি টেক্সট আগে থেকেই ইউনিকোড হয় (বাংলা বর্ণ থাকে), তবে কনভার্ট করবে না
-    const isUnicode = /[\u0980-\u09FF]/.test(text);
-    if (isUnicode) return text;
+// কনভার্টার ইঞ্জিন: যা যেকোনো ইনপুটকে ইউনিকোড করবে
+function toUnicode(text) {
+    if (!text) return "";
+    // যদি টেক্সটে অলরেডি বাংলা থাকে, তবে কনভার্ট করার দরকার নেই
+    if (/[\u0980-\u09FF]/.test(text)) return text.trim();
 
-    // নতুবা বিজয় ASCII থেকে ইউনিকোড করবে
     let output = "";
     for (let char of text) {
-        output += bijoyToUniMap[char] || char;
+        output += bijoyMap[char] || char;
     }
-    // কার চিহ্নের পজিশন ঠিক করা (সহজ লজিক)
-    return output.replace(/ে([ক-হ])/g, '$1ে').replace(/ি([ক-হ])/g, '$1ি');
+    // কার চিহ্নের পজিশন ঠিক করার লজিক
+    return output.replace(/ে([ক-হ])/g, '$1ে')
+                 .replace(/ি([ক-হ])/g, '$1ি')
+                 .replace(/ৈ([ক-হ])/g, '$1ৈ')
+                 .replace(/ো([ক-হ])/g, '$1ো');
 }
 
-let originalText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ";
 let sourceWords = [];
 
-function init(text) {
-    if(!text) return;
-    originalText = text.trim().replace(/\s+/g, ' ');
-    sourceWords = originalText.split(' ');
-    document.getElementById('display-area').innerHTML = sourceWords.map(w => `<span>${w}</span>`).join(' ');
-    document.getElementById('typing-input').value = "";
+const displayArea = document.getElementById('display-area');
+const typingInput = document.getElementById('typing-input');
+const sourceInput = document.getElementById('source-input');
+
+// পরীক্ষা সেটআপ করার ফাংশন
+function setupTest(text) {
+    // ১. আপনার দেয়া টেক্সটকে আগে ইউনিকোডে রূপান্তর করা হচ্ছে
+    let unicodeSource = toUnicode(text);
+    sourceWords = unicodeSource.split(/\s+/);
+    
+    displayArea.innerHTML = sourceWords.map(w => `<span>${w}</span>`).join(' ');
+    typingInput.value = "";
+    updateStats(0, 0);
 }
 
-init(originalText);
+document.getElementById('set-text-btn').addEventListener('click', () => {
+    setupTest(sourceInput.value);
+});
 
-document.getElementById('typing-input').addEventListener('input', function() {
-    let rawValue = this.value;
-    let typedWordsRaw = rawValue.split(/\s+/);
-    
+// টাইপিং চেক করার লজিক
+typingInput.addEventListener('input', function() {
+    let typedRaw = this.value.split(/\s+/);
+    let spans = displayArea.querySelectorAll('span');
     let correct = 0;
     let wrong = 0;
-    let spans = document.querySelectorAll('#display-area span');
 
     spans.forEach((span, i) => {
-        if (!typedWordsRaw[i]) {
+        if (!typedRaw[i]) {
             span.className = '';
             return;
         }
 
-        // এখানে স্মার্ট কনভার্টার কাজ করছে
-        let processedTyped = getSmartText(typedWordsRaw[i]);
-        let target = sourceWords[i];
+        // ২. আপনার টাইপ করা বিজয় টেক্সটকেও ইউনিকোডে রূপান্তর করে চেক করা হচ্ছে
+        let typedUnicode = toUnicode(typedRaw[i]);
+        let targetUnicode = sourceWords[i];
 
-        if (processedTyped === target) {
+        if (typedUnicode === targetUnicode) {
             span.className = 'correct';
             correct++;
         } else {
@@ -94,14 +114,18 @@ document.getElementById('typing-input').addEventListener('input', function() {
             wrong++;
         }
 
-        if (i === typedWordsRaw.length - 1) span.classList.add('active');
+        if (i === typedRaw.length - 1) span.classList.add('active');
     });
 
-    document.getElementById('correct-count').innerText = correct;
-    document.getElementById('wrong-count').innerText = wrong;
-    let total = correct + wrong;
-    document.getElementById('accuracy').innerText = total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
+    updateStats(correct, wrong);
 });
+
+function updateStats(c, w) {
+    document.getElementById('correct-count').innerText = c;
+    document.getElementById('wrong-count').innerText = w;
+    let total = c + w;
+    document.getElementById('accuracy').innerText = total > 0 ? ((c / total) * 100).toFixed(1) : 0;
+}
 </script>
 
 </body>
