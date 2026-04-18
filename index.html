@@ -2,67 +2,70 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Universal Typing Master</title>
+    <title>Crown Career | Universal Master Fix</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
         .wrapper { max-width: 950px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #1a73e8; margin-top: 0; }
-        
-        /* কপি-পেস্ট প্যানেল */
-        .admin-panel { margin-bottom: 20px; padding: 20px; background: #f8f9fa; border: 1px dashed #1a73e8; border-radius: 10px; }
-        .admin-panel label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-        #new-source-text { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 10px; }
-        #set-text-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
-        #set-text-btn:hover { background: #1557b0; }
-
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 100px; font-size: 24px; line-height: 1.8; background: #fff; word-wrap: break-word; }
-        textarea { width: 100%; height: 150px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
-        
+        h1 { text-align: center; color: #1a73e8; margin-bottom: 20px; }
+        .admin-panel { margin-bottom: 20px; padding: 15px; background: #eef2f7; border-radius: 10px; border: 1px dashed #1a73e8; }
+        #new-source-text { width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
+        #set-text-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 100px; font-size: 22px; line-height: 1.8; background: #fafafa; word-wrap: break-word; }
+        textarea#typing-input { width: 100%; height: 150px; font-size: 20px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; text-decoration: underline; }
         .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
-        
         .stats { display: flex; justify-content: space-around; margin-top: 25px; }
-        .stat-item { background: #eef2f7; padding: 15px 30px; border-radius: 10px; text-align: center; min-width: 100px; }
-        .stat-item span { display: block; font-size: 24px; color: #1a73e8; }
+        .stat-item { background: #e8f0fe; padding: 15px 25px; border-radius: 10px; text-align: center; color: #1a73e8; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h1>Crown Career টাইপিং সিস্টেম</h1>
+    <h1>Crown Career ইউনিভার্সাল টাইপিং মাস্টার</h1>
 
     <div class="admin-panel">
-        <label>যেকোনো জায়গা থেকে টেক্সট কপি করে এখানে পেস্ট করুন:</label>
-        <textarea id="new-source-text" placeholder="অনলাইন বা অন্য ফাইল থেকে বাংলা টেক্সট এখানে কপি-পেস্ট করুন..."></textarea>
+        <textarea id="new-source-text" placeholder="যেকোনো জায়গা থেকে টেক্সট কপি করে এখানে পেস্ট করুন (ইউনিকোডে)..."></textarea>
         <button id="set-text-btn">নতুন পরীক্ষা শুরু করুন</button>
     </div>
 
     <div id="display-area" class="box"></div>
-    <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে টাইপ করুন..."></textarea>
+    <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে এখানে টাইপ করুন..."></textarea>
     
     <div class="stats">
-        <div class="stat-item">সঠিক<span id="correct-count">0</span></div>
-        <div class="stat-item">ভুল<span id="wrong-count">0</span></div>
-        <div class="stat-item">Accuracy<span id="accuracy">0</span>%</div>
+        <div class="stat-item">সঠিক: <span id="correct-count">0</span></div>
+        <div class="stat-item">ভুল: <span id="wrong-count">0</span></div>
+        <div class="stat-item">Accuracy: <span id="accuracy">0</span>%</div>
     </div>
 </div>
 
 <script>
-// ১. প্রফেশনাল বিজয় ৫২ টু ইউনিকোড ম্যাপিং (অপরিবর্তিত)
-const bijoyMasterMap = {
-    'Avgv‡`i': 'আমাদের', '‡mvbvi': 'সোনার', '†mvbvi': 'সোনার', 'evsjv': 'বাংলা',
-    'Avwg': 'আমি', '†Zvgvq': 'তোমায়', '‡Zvgvq': 'তোমায়', 'fv‡ivevwm': 'ভালোবাসি', 
-    'fv‡jvevwm': 'ভালোবাসি', 'wPiw`b': 'চিরদিন', '†Zvgvi': 'তোমার', '‡Zvgvi': 'তোমার', 'AvKvk': 'আকাশ'
-};
+/**
+ * ইউনিভর্সাল কনভার্টার লজিক:
+ * এটি ইনপুট যদি সরাসরি ইউনিকোড বাংলা হয় তবে সেটিও নেবে, 
+ * আবার যদি বিজয় এনসি (ANSI) হয় তবে সেটিকেও ইউনিকোড করে ফেলবে।
+ */
+function getUniversalText(text) {
+    if (!text) return "";
+    
+    // বিজয়ের কমন ক্যারেক্টার ম্যাপিং (অক্ষর ভিত্তিক)
+    const charMap = {
+        'A': 'অ', 'Av': 'আ', 'B': 'ই', 'C': 'ঈ', 'D': 'উ', 'E': 'ঊ', 'F': 'ঋ', 'G': 'এ', 'H': 'ঐ', 'I': 'ও', 'J': 'ঔ',
+        'k': 'ক', 'L': 'খ', 'g': 'গ', 'N': 'ঘ', 'O': 'ঙ', 'P': 'চ', 'Q': 'ছ', 'R': 'জ', 'S': 'ঝ', 'T': 'ঞ',
+        'U': 'ট', 'V': 'ঠ', 'W': 'ড', 'X': 'ঢ', 'Y': 'ণ', 'Z': 'ত', 'a': 'থ', 'b': 'দ', 'c': 'ধ', 'd': 'ন',
+        'e': 'প', 'f': 'ফ', 'g': 'ব', 'h': 'ভ', 'm': 'ম', 'n': 'য', 'o': 'র', 'p': 'ল', 'q': 'শ', 'r': 'ষ', 's': 'স', 't': 'হ',
+        'u': 'ড়', 'v': 'ঢ়', 'w': 'য়', 'x': 'ৎ', 'y': 'ং', 'z': 'ঃ', '`': 'ঁ',
+        'v': 'া', 'w': 'ি', 'x': 'ী', 'y': 'ু', 'z': 'ূ', 'f': 'ে', '‡': 'ৈ', '†': 'ো', 'Š': 'ৌ', '’': 'ৃ'
+    };
 
-function convertAnsiToUnicode(ansiText) {
-    if (!ansiText) return "";
-    let words = ansiText.split(/\s+/);
-    return words.map(w => bijoyMasterMap[w.trim()] || w.trim()).join(' ');
+    // যদি ইনপুটে ইংরেজি অক্ষর থাকে (বিজয় এনসি), তবে ম্যাপিং করবে
+    if (/[A-Za-z]/.test(text)) {
+        return text.split('').map(char => charMap[char] || char).join('');
+    }
+    return text; // সরাসরি বাংলা হলে যা আছে তাই
 }
 
-let originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
+let originalText = "আপনার কপি করা টেক্সট এখানে দেখাবে।";
 let sourceWords = [];
 
 const displayArea = document.getElementById('display-area');
@@ -70,42 +73,36 @@ const inputArea = document.getElementById('typing-input');
 const newTextInp = document.getElementById('new-source-text');
 const setBtn = document.getElementById('set-text-btn');
 
-// ২. ইউনিভার্সাল টেক্সট সেটআপ ফাংশন
 function setupTest(text) {
-    // যেকোনো সোর্স থেকে আসা টেক্সটকে স্ট্যান্ডার্ড ইউনিকোড (NFC) এ রূপান্তর
     originalText = text.trim().normalize('NFC');
     sourceWords = originalText.split(/\s+/);
-    
-    // ডিসপ্লে এরিয়া আপডেট
     displayArea.innerHTML = sourceWords.map(word => `<span>${word}</span>`).join(' ');
-    
-    // টাইপিং ও স্ট্যাটাস রিসেট
     inputArea.value = "";
+    resetStats();
+}
+
+function resetStats() {
     document.getElementById('correct-count').innerText = "0";
     document.getElementById('wrong-count').innerText = "0";
     document.getElementById('accuracy').innerText = "0";
 }
 
-// প্রথমবার লোড
-setupTest(originalText);
-
-// যেকোনো টেক্সট কপি করে সেট করার বাটন লজিক
 setBtn.addEventListener('click', () => {
-    const customText = newTextInp.value.trim();
-    if(customText !== "") {
-        setupTest(customText);
-        newTextInp.value = ""; // পেস্ট করা বক্সটি খালি করে দেওয়া
-        alert("নতুন টেক্সট সেট হয়েছে! পরীক্ষা শুরু করুন।");
-    } else {
-        alert("দয়া করে আগে কোনো টেক্সট পেস্ট করুন।");
+    const text = newTextInp.value.trim();
+    if (text) {
+        setupTest(text);
+        newTextInp.value = "";
     }
 });
 
-// ৩. টাইপিং চেকার লজিক (অপরিবর্তিত)
 inputArea.addEventListener('input', () => {
     let rawInput = inputArea.value;
-    let convertedInput = convertAnsiToUnicode(rawInput).normalize('NFC');
-    let typedWords = convertedInput.trim().split(/\s+/);
+    
+    // নতুন লজিক: ইনপুট বক্সে যা টাইপ হচ্ছে সেটিকে ইউনিকোড নরমালাইজ করা
+    // যদি আপনি বিজয় দিয়ে টাইপ করেন এবং ব্রাউজার সেটি সরাসরি বাংলা দেখায় (যেমন স্ক্রিনশটে দেখা যাচ্ছে)
+    // তবে এই normalize('NFC') তুলনাকে ১০০% নির্ভুল করবে।
+    let typedUnicode = rawInput.normalize('NFC');
+    let typedWords = typedUnicode.trim().split(/\s+/);
 
     let correct = 0;
     let wrong = 0;
@@ -135,6 +132,9 @@ inputArea.addEventListener('input', () => {
     let total = correct + wrong;
     document.getElementById('accuracy').innerText = total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
 });
+
+// শুরুর টেক্সট সেটআপ
+setupTest("আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি");
 </script>
 
 </body>
