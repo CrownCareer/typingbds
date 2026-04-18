@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>BCC Typing Master (Final Working)</title>
+<title>BCC Typing Master (Final Auto Detect)</title>
 
 <style>
 body {
@@ -51,15 +51,8 @@ button {
     cursor: pointer;
 }
 
-.correct {
-    color: green;
-    font-weight: bold;
-}
-
-.wrong {
-    color: red;
-    text-decoration: underline;
-}
+.correct { color: green; font-weight: bold; }
+.wrong { color: red; text-decoration: underline; }
 
 .bar {
     background: #343a40;
@@ -72,9 +65,7 @@ button {
     font-weight: bold;
 }
 
-#analysis {
-    margin-top: 15px;
-}
+#analysis { margin-top: 15px; }
 
 #final {
     margin-top: 20px;
@@ -85,7 +76,7 @@ button {
 }
 </style>
 
-<!-- Bijoy to Unicode CDN -->
+<!-- Bijoy Converter -->
 <script src="https://cdn.jsdelivr.net/gh/forhad-bd/bijoy2unicode/bijoy2unicode.min.js"></script>
 
 </head>
@@ -102,7 +93,7 @@ button {
 ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
 </div>
 
-<textarea id="box" placeholder="বিজয় (ANSI) দিয়ে টাইপ করুন..." oninput="run()"></textarea>
+<textarea id="box" placeholder="Bijoy / Unicode যেকোনো দিয়ে টাইপ করুন..." oninput="run()"></textarea>
 
 <button onclick="submitTest()">Submit</button>
 
@@ -114,10 +105,14 @@ button {
 
 <script>
 
-// target text
 const target = document.getElementById("display").innerText.trim();
 
-// safe converter (library fail হলেও কাজ করবে)
+// 🔥 detect unicode bangla
+function isUnicodeBangla(text){
+    return /[\u0980-\u09FF]/.test(text);
+}
+
+// 🔥 safe convert
 function convert(text){
     try {
         if (typeof BijoyToUnicode === "function") {
@@ -129,11 +124,24 @@ function convert(text){
     }
 }
 
-// 🔹 live typing analysis
+// 🔥 auto detect
+function processInput(text){
+    if (isUnicodeBangla(text)) {
+        return text;
+    } else {
+        return convert(text);
+    }
+}
+
+// 🔹 live typing
 function run() {
 
     let input = document.getElementById("box").value;
-    let uni = convert(input).trim();
+
+    let uni = processInput(input)
+        .normalize('NFC')
+        .replace(/\s+/g, ' ')
+        .trim();
 
     let tWords = target.split(/\s+/);
     let uWords = uni.split(/\s+/);
@@ -158,11 +166,15 @@ function run() {
         ((correct / tWords.length) * 100).toFixed(2);
 }
 
-// 🔹 submit result
+// 🔹 submit
 function submitTest() {
 
     let input = document.getElementById("box").value;
-    let uni = convert(input).trim();
+
+    let uni = processInput(input)
+        .normalize('NFC')
+        .replace(/\s+/g, ' ')
+        .trim();
 
     let tWords = target.split(/\s+/);
     let uWords = uni.split(/\s+/);
