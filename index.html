@@ -2,12 +2,13 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Final Fix</title>
+    <title>Crown Career | Bijoy Typing Master Final Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
         .wrapper { max-width: 900px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; font-size: 24px; line-height: 1.8; background: #fafafa; }
-        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; }
+        h1 { text-align: center; color: #1a73e8; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 80px; font-size: 24px; line-height: 1.8; background: #fafafa; }
+        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; text-decoration: underline; }
         .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
@@ -17,9 +18,9 @@
 <body>
 
 <div class="wrapper">
-    <h1 style="text-align:center; color:#1a73e8;">বিজয় টাইপিং মাস্টার - ফাইনাল ফিক্স</h1>
+    <h1>বিজয় টাইপিং মাস্টার - ও-কার সমাধান</h1>
     <div id="display-area" class="box"></div>
-    <textarea id="typing-input" placeholder="এখানে টাইপ করুন..."></textarea>
+    <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে টাইপ করুন..."></textarea>
     <div class="stats">
         <div>সঠিক: <span id="correct-count">0</span></div>
         <div>ভুল: <span id="wrong-count">0</span></div>
@@ -28,23 +29,46 @@
 </div>
 
 <script>
-// ১. এই ফাংশনটি ইংরেজি কোড এবং বাংলা—উভয়কেই নরমাল ইউনিকোডে রূপান্তর করবে
-function universalConverter(text) {
-    if (!text) return "";
-    
-    // বিজয় এনসি টু ইউনিকোড ম্যাপিং
-    const map = {
-        'Avgv‡`i': 'আমাদের', '‡mvbvi': 'সোনার', 'evsjv': 'বাংলা',
-        'Avwg': 'আমি', '†Zvgvq': 'তোমায়', 'fv‡ivevwm': 'ভালোবাসি',
-        'সোনার': 'সোনার', 'ভালোবাসি': 'ভালোবাসি' // সরাসরি বাংলা ইনপুটের জন্য
-    };
+/**
+ * ১. ও-কার এবং অন্যান্য কার চিহ্নের জন্য উন্নত ম্যাপিং
+ * এখানে ‡ (Alt+0135) এবং † (Alt+0134) উভয় ও-কার চিহ্নকে অন্তর্ভুক্ত করা হয়েছে।
+ */
+const bijoyMasterMap = {
+    'Avgv‡`i': 'আমাদের',
+    '‡mvbvi': 'সোনার',   
+    '†mvbvi': 'সোনার',   
+    'evsjv': 'বাংলা',
+    'Avwg': 'আমি',
+    '†Zvgvq': 'তোমায়',   
+    '‡Zvgvq': 'তোমায়',   
+    'fv‡ivevwm': 'ভালোবাসি', 
+    'fv‡jvevwm': 'ভালোবাসি',
+    'wPiw`b': 'চিরদিন',
+    '†Zvgvi': 'তোমার',
+    '‡Zvgvi': 'তোমার',
+    'AvKvk': 'আকাশ'
+};
 
-    let words = text.trim().split(/\s+/);
-    return words.map(w => map[w] || w).join(' ');
+function advancedConverter(ansiText) {
+    if (!ansiText) return "";
+    
+    // বিজয়ের স্পেশাল ক্যারেক্টার ও স্পেস ক্লিন করা
+    let words = ansiText.split(/\s+/);
+    
+    return words.map(w => {
+        let cleanWord = w.trim();
+        // যদি ম্যাপে সরাসরি শব্দ পাওয়া যায়
+        if (bijoyMasterMap[cleanWord]) return bijoyMasterMap[cleanWord];
+        
+        // যদি ম্যাপে না পাওয়া যায়, তবে এটি ইউনিকোড ইনপুট কিনা চেক করবে
+        return cleanWord;
+    }).join(' ');
 }
 
 const originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
-const sourceWords = originalText.split(' ');
+// মূল টেক্সটকে নরমালাইজ করা (যাতে ও-কার ভেঙ্গে না যায়)
+const sourceWords = originalText.normalize('NFC').split(' ');
+
 const displayArea = document.getElementById('display-area');
 const inputArea = document.getElementById('typing-input');
 
@@ -55,9 +79,10 @@ init();
 
 inputArea.addEventListener('input', () => {
     let rawInput = inputArea.value;
-    let convertedInput = universalConverter(rawInput);
+    let convertedInput = advancedConverter(rawInput);
     
-    // ইউনিকোড ক্যারেক্টার নরমালাইজেশন (যাতে 'ো' বা 'া' কারের কোড সমস্যা না করে)
+    // ২. সবচেয়ে গুরুত্বপূর্ণ অংশ: NFC Normalization
+    // এটি 'ে' + 'া' কে একত্রে 'ো' হিসেবে রূপান্তর করে
     convertedInput = convertedInput.normalize('NFC');
     let typedWords = convertedInput.trim().split(/\s+/);
 
@@ -75,10 +100,6 @@ inputArea.addEventListener('input', () => {
             span.className = 'correct';
             correct++;
         } else {
-            // বিশেষ চেক: যদি বিজয় থেকে আসা টেক্সটে স্পেলিং ভ্যারিয়েশন থাকে
-            if (target.includes('সোনার') && (typed.includes('সোনর') || typed.includes('‡mvbvi'))) {
-                 // এটি মূলত ডিবাগিংয়ের জন্য, তবে লজিক্যালি ভুল ধরা উচিত
-            }
             span.className = 'wrong';
             wrong++;
         }
