@@ -2,13 +2,12 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>BCC Standard Final Fix</title>
+    <title>BCC Standard Typing Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; }
-        .wrapper { max-width: 900px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* সুতন্বীএমজে ফন্ট লজিক */
-        #passage, #typing-area, #result-analysis { 
+        #passage, #typing-area, #result { 
             font-family: 'SutonnyMJ', 'SolaimanLipi', Arial; 
             font-size: 26px; line-height: 1.6; text-align: left;
         }
@@ -16,69 +15,70 @@
         #passage { background: #fff9c4; padding: 20px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 25px; }
         textarea { width: 100%; height: 180px; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; outline: none; box-sizing: border-box; }
         
-        .correct { color: #28a745 !important; font-weight: bold; }
+        .correct { color: #28a745 !important; font-weight: bold; border-bottom: 2px solid #28a745; }
         .wrong { color: #d93025; text-decoration: underline; font-weight: bold; }
-        #result-analysis { margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 20px; }
+        #result { margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <h2 style="color: #1a73e8; text-align: center;">বিসিসি স্ট্যান্ডার্ড টাইপিং মাস্টার</h2>
+<div class="container">
+    <h2 style="color: #1a73e8;">কম্পিউটার টাইপিং দক্ষতা পরীক্ষা (BCC Standard)</h2>
     
     <div id="passage">২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।</div>
 
-    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে টাইপ করুন..." oninput="bccEngine()"></textarea>
+    <textarea id="typing-area" placeholder="বিজয় ক্লাসিক (Ctrl+Alt+B) দিয়ে টাইপ করুন..." oninput="checkTyping()"></textarea>
 
-    <div id="result-analysis">টাইপিং বিশ্লেষণ এখানে দেখাবে...</div>
+    <div id="result"></div>
 </div>
 
 <script>
-    const passageText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    // প্যাসেজটিকে 'Clean' করে নেওয়া (অদৃশ্য ক্যারেক্টার রিমুভ করা)
+    const rawText = "২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।";
+    const cleanTarget = rawText.normalize('NFC').replace(/[\u200B-\u200D\uFEFF]/g, '');
 
-    // এই ফাংশনটি বিজয় ক্লাসিকের হিজিবিজি অক্ষরগুলোকে ইউনিকোডে রূপান্তর করবে
-    function ansiToUni(str) {
+    function ansiToUnicode(str) {
         if (!str) return "";
-        const mapping = {
+        const map = {
             'a':'ঋ','b':'ন','c':'এ','d':'ি','e':'ড','f':'া','g':'হ','h':'ব','i':'হ','j':'র','k':'ক','l':'ত','m':'ম','n':'স','o':'গ','p':'ড়','q':'ঙ','r':'প','s':'ু','t':'ট','u':'ঝ','v':'ল','w':'য়','x':'ও','y':'চ','z':'য',
             'A':'ৃ','B':'ণ','C':'ঐ','D':'ী','E':'ঢ','F':'অ','G':'।','H':'ভ','I':'ও','J':'্র','K':'খ','L':'থ','M':'উ','N':'ষ','O':'ঘ','P':'ঢ়','Q':'ং','R':'ফ','S':'ূ','T':'ঠ','U':'ঝ','V':'ল','W':'য়','X':'ৗ','Y':'ছ','Z':'্য',
             '1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯','0':'০',
             '‡':'ে','†':'ে','v':'া','i':'ি','I':'ও','x':'ও'
         };
 
-        let result = "";
+        let out = "";
         for (let i = 0; i < str.length; i++) {
-            let cur = str[i], nxt = str[i+1];
-            // বিজয় ক্লাসিকের 'কার' চিহ্নের পজিশন ফিক্সিং
-            if (['d', '‡', '†', 'c', 'C', 'i'].includes(cur) && nxt) {
-                result += (mapping[nxt] || nxt) + (mapping[cur] || cur);
+            let char = str[i], next = str[i+1];
+            // কার-চিহ্ন পজিশন শিফটিং (বিজয় ক্লাসিকের জন্য আবশ্যক)
+            if (['d', '‡', '†', 'c', 'C', 'i'].includes(char) && next) {
+                out += (map[next] || next) + (map[char] || char);
                 i++;
             } else {
-                result += mapping[cur] || cur;
+                out += map[char] || char;
             }
         }
-        return result.normalize('NFC').replace(/র‌্য/g, 'র্য');
+        return out.normalize('NFC').replace(/র‌্য/g, 'র্য');
     }
 
-    function bccEngine() {
-        const inputVal = document.getElementById('typing-area').value;
-        const uWords = inputVal.trim().split(/\s+/);
-        const pWords = passageText.split(/\s+/);
+    function checkTyping() {
+        const input = document.getElementById('typing-area').value;
+        const words = input.trim().split(/\s+/);
+        const targetWords = cleanTarget.split(/\s+/);
         
         let html = "";
-        pWords.forEach((word, index) => {
-            let rawUser = uWords[index] || "";
-            let convertedUser = ansiToUni(rawUser);
-            let targetWord = word.normalize('NFC').trim();
+        targetWords.forEach((target, i) => {
+            let rawUser = words[i] || "";
+            let convertedUser = ansiToUnicode(rawUser);
+            let goal = target.normalize('NFC').trim();
 
-            // ডুয়াল চেক লজিক: সরাসরি মিললে অথবা কনভার্ট হয়ে মিললে সঠিক (সবুজ) হবে
-            if (rawUser !== "" && (convertedUser === targetWord || rawUser === targetWord)) {
+            // ডুয়াল চেক: যদি সরাসরি মিলে অথবা কনভার্ট হয়ে মিলে তবেই সবুজ
+            if (rawUser !== "" && (convertedUser === goal || rawUser === goal)) {
                 html += `<span class="correct">${rawUser} </span>`;
             } else if (rawUser !== "") {
                 html += `<span class="wrong">${rawUser}</span> `;
             }
         });
-        document.getElementById('result-analysis').innerHTML = html;
+        document.getElementById('result').innerHTML = html;
     }
 </script>
 
