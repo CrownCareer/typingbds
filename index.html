@@ -2,81 +2,55 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>BCC Typing Master (Final Auto Detect)</title>
+<title>BCC Typing Master (Stable Final)</title>
 
 <style>
-body {
-    font-family: 'Segoe UI', Arial;
-    background: #eef2f3;
-    padding: 20px;
-}
-
-.wrapper {
-    max-width: 900px;
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 15px;
-}
+body { font-family:'Segoe UI'; background:#eef2f3; padding:20px; }
+.wrapper { max-width:900px; margin:auto; background:#fff; padding:30px; border-radius:15px; }
 
 #display, textarea, #analysis, #final {
-    font-family: 'SutonnyMJ','SolaimanLipi';
-    font-size: 26px;
+    font-family:'SutonnyMJ','SolaimanLipi';
+    font-size:26px;
 }
 
 #display {
-    background: #fff3cd;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    background:#fff3cd;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
 }
 
 textarea {
-    width: 100%;
-    height: 160px;
-    border: 2px solid #007bff;
-    border-radius: 10px;
-    padding: 10px;
-    outline: none;
+    width:100%;
+    height:160px;
+    border:2px solid blue;
+    border-radius:10px;
+    padding:10px;
 }
 
 button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 18px;
-    background: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    margin-top:15px;
+    padding:10px 20px;
+    font-size:18px;
+    background:#28a745;
+    color:#fff;
+    border:none;
+    border-radius:8px;
 }
 
-.correct { color: green; font-weight: bold; }
-.wrong { color: red; text-decoration: underline; }
+.correct { color:green; font-weight:bold; }
+.wrong { color:red; text-decoration:underline; }
 
 .bar {
-    background: #343a40;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-around;
-    font-weight: bold;
-}
-
-#analysis { margin-top: 15px; }
-
-#final {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    border: 1px solid #ddd;
+    background:#333;
+    color:#fff;
+    padding:10px;
+    margin-bottom:15px;
+    display:flex;
+    justify-content:space-around;
 }
 </style>
 
-<!-- Bijoy Converter -->
 <script src="https://cdn.jsdelivr.net/gh/forhad-bd/bijoy2unicode/bijoy2unicode.min.js"></script>
 
 </head>
@@ -86,33 +60,42 @@ button {
 
 <div class="bar">
     <div>সঠিক: <span id="correct">0</span></div>
-    <div>Accuracy: <span id="acc">0.00</span>%</div>
+    <div>Accuracy: <span id="acc">0</span>%</div>
 </div>
 
 <div id="display">
 ২০১৪ ও ২০১৬ সালের পর আবারও চ্যাম্পিয়ন্স লিগ কোয়ার্টার ফাইনালে আতলেতিকো মাদ্রিদের কাছে হেরে গেল বার্সা।
 </div>
 
-<textarea id="box" placeholder="Bijoy / Unicode যেকোনো দিয়ে টাইপ করুন..." oninput="run()"></textarea>
+<textarea id="box" oninput="run()"></textarea>
 
 <button onclick="submitTest()">Submit</button>
 
 <div id="analysis"></div>
 
-<div id="final">Final Result এখানে দেখাবে...</div>
+<div id="final">Result এখানে দেখাবে</div>
 
 </div>
 
 <script>
 
-const target = document.getElementById("display").innerText.trim();
+const targetRaw = document.getElementById("display").innerText;
 
-// 🔥 detect unicode bangla
+// 🔥 text clean + normalize (এটাই আসল fix)
+function normalizeText(text){
+    return text
+        .normalize('NFC')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '') // hidden char remove
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// detect unicode
 function isUnicodeBangla(text){
     return /[\u0980-\u09FF]/.test(text);
 }
 
-// 🔥 safe convert
+// safe convert
 function convert(text){
     try {
         if (typeof BijoyToUnicode === "function") {
@@ -124,38 +107,35 @@ function convert(text){
     }
 }
 
-// 🔥 auto detect
+// auto process
 function processInput(text){
-    if (isUnicodeBangla(text)) {
-        return text;
-    } else {
-        return convert(text);
-    }
+    if (isUnicodeBangla(text)) return text;
+    return convert(text);
 }
 
-// 🔹 live typing
-function run() {
+const target = normalizeText(targetRaw);
+
+// 🔹 live
+function run(){
 
     let input = document.getElementById("box").value;
 
-    let uni = processInput(input)
-        .normalize('NFC')
-        .replace(/\s+/g, ' ')
-        .trim();
+    let uni = normalizeText(processInput(input));
 
-    let tWords = target.split(/\s+/);
-    let uWords = uni.split(/\s+/);
+    let tWords = target.split(" ");
+    let uWords = uni.split(" ");
 
     let html = "";
     let correct = 0;
 
-    tWords.forEach((word, i) => {
+    tWords.forEach((word,i)=>{
         let u = uWords[i] || "";
 
-        if (u === word) {
+        if (normalizeText(u) === normalizeText(word)){
             html += `<span class="correct">${u} </span>`;
             correct++;
-        } else if (u !== "") {
+        }
+        else if(u){
             html += `<span class="wrong">${u} </span>`;
         }
     });
@@ -163,40 +143,37 @@ function run() {
     document.getElementById("analysis").innerHTML = html;
     document.getElementById("correct").innerText = correct;
     document.getElementById("acc").innerText =
-        ((correct / tWords.length) * 100).toFixed(2);
+        ((correct/tWords.length)*100).toFixed(2);
 }
 
 // 🔹 submit
-function submitTest() {
+function submitTest(){
 
     let input = document.getElementById("box").value;
 
-    let uni = processInput(input)
-        .normalize('NFC')
-        .replace(/\s+/g, ' ')
-        .trim();
+    let uni = normalizeText(processInput(input));
 
-    let tWords = target.split(/\s+/);
-    let uWords = uni.split(/\s+/);
+    let tWords = target.split(" ");
+    let uWords = uni.split(" ");
 
     let correct = 0;
     let wrong = 0;
 
-    tWords.forEach((word, i) => {
+    tWords.forEach((word,i)=>{
         let u = uWords[i] || "";
 
-        if (u === word) correct++;
-        else if (u !== "") wrong++;
+        if (normalizeText(u) === normalizeText(word)) correct++;
+        else if(u) wrong++;
     });
 
-    let accuracy = ((correct / tWords.length) * 100).toFixed(2);
+    let acc = ((correct/tWords.length)*100).toFixed(2);
 
     document.getElementById("final").innerHTML = `
         <b>ফাইনাল রেজাল্ট</b><br><br>
         মোট শব্দ: ${tWords.length}<br>
         সঠিক: ${correct}<br>
         ভুল: ${wrong}<br>
-        Accuracy: ${accuracy}%
+        Accuracy: ${acc}%
     `;
 }
 
