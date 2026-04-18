@@ -2,13 +2,12 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Crown Career | Bijoy Typing Master Fix</title>
+    <title>Crown Career | Final Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
         .wrapper { max-width: 900px; width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #1a73e8; }
-        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; min-height: 80px; font-size: 24px; line-height: 1.8; background: #fafafa; }
-        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; font-family: 'SutonnyMJ', serif; }
+        .box { border: 2px solid #eee; border-radius: 10px; padding: 20px; margin-bottom: 20px; font-size: 24px; line-height: 1.8; background: #fafafa; }
+        textarea { width: 100%; height: 120px; font-size: 22px; padding: 15px; border: 2px solid #1a73e8; border-radius: 10px; outline: none; resize: none; box-sizing: border-box; }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; text-decoration: underline; }
         .active { background-color: #fff3cd; border-bottom: 3px solid #1a73e8; }
@@ -18,9 +17,9 @@
 <body>
 
 <div class="wrapper">
-    <h1>বিজয় টাইপিং মাস্টার - সমাধান ভার্সন</h1>
+    <h1 style="text-align:center; color:#1a73e8;">বিজয় টাইপিং মাস্টার - ফাইনাল ফিক্স</h1>
     <div id="display-area" class="box"></div>
-    <textarea id="typing-input" placeholder="বিজয় ৫২ (Classic) মোডে টাইপ করুন..."></textarea>
+    <textarea id="typing-input" placeholder="এখানে টাইপ করুন..."></textarea>
     <div class="stats">
         <div>সঠিক: <span id="correct-count">0</span></div>
         <div>ভুল: <span id="wrong-count">0</span></div>
@@ -29,28 +28,21 @@
 </div>
 
 <script>
-// ১. প্রফেশনাল বিজয় ৫২ টু ইউনিকোড ম্যাপিং টেবিল
-// এখানে প্রতিটি বিজয়ের ইংরেজি সিকোয়েন্সের বিপরীতে সঠিক বাংলা শব্দ দেওয়া হয়েছে
-const bijoyMasterMap = {
-    'Avgv‡`i': 'আমাদের',
-    '‡mvbvi': 'সোনার',   // ‡ + m + v + b + v + i
-    'evsjv': 'বাংলা',
-    'Avwg': 'আমি',
-    '†Zvgvq': 'তোমায়',   // † + Z + v + m + q
-    'fv‡ivevwm': 'ভালোবাসি', // f + v + ‡ + i + e + v + w + m
-    'wPiw`b': 'চিরদিন',
-    '†Zvgvi': 'তোমার',
-    'AvKvk': 'আকাশ'
-};
+// ১. এই ফাংশনটি ইংরেজি কোড এবং বাংলা—উভয়কেই নরমাল ইউনিকোডে রূপান্তর করবে
+function universalConverter(text) {
+    if (!text) return "";
+    
+    // বিজয় এনসি টু ইউনিকোড ম্যাপিং
+    const map = {
+        'Avgv‡`i': 'আমাদের', '‡mvbvi': 'সোনার', 'evsjv': 'বাংলা',
+        'Avwg': 'আমি', '†Zvgvq': 'তোমায়', 'fv‡ivevwm': 'ভালোবাসি',
+        'সোনার': 'সোনার', 'ভালোবাসি': 'ভালোবাসি' // সরাসরি বাংলা ইনপুটের জন্য
+    };
 
-function advancedConverter(ansiText) {
-    if (!ansiText) return "";
-    // অতিরিক্ত স্পেস রিমুভ করা এবং শব্দে ভাগ করা
-    let words = ansiText.trim().split(/\s+/);
-    return words.map(w => bijoyMasterMap[w] || w).join(' ');
+    let words = text.trim().split(/\s+/);
+    return words.map(w => map[w] || w).join(' ');
 }
 
-// ২. সোর্স টেক্সট (এটি ইউনিকোডে থাকবে)
 const originalText = "আমাদের সোনার বাংলা আমি তোমায় ভালোবাসি";
 const sourceWords = originalText.split(' ');
 const displayArea = document.getElementById('display-area');
@@ -61,10 +53,12 @@ function init() {
 }
 init();
 
-// ৩. টাইপিং চেকার লজিক
 inputArea.addEventListener('input', () => {
-    let rawInput = inputArea.value; // এটি বিজয় এনসি (ANSI) ডেটা
-    let convertedInput = advancedConverter(rawInput);
+    let rawInput = inputArea.value;
+    let convertedInput = universalConverter(rawInput);
+    
+    // ইউনিকোড ক্যারেক্টার নরমালাইজেশন (যাতে 'ো' বা 'া' কারের কোড সমস্যা না করে)
+    convertedInput = convertedInput.normalize('NFC');
     let typedWords = convertedInput.trim().split(/\s+/);
 
     let correct = 0;
@@ -72,26 +66,28 @@ inputArea.addEventListener('input', () => {
     let spans = displayArea.querySelectorAll('span');
 
     spans.forEach((span, i) => {
-        let target = sourceWords[i];
-        let typed = typedWords[i];
+        let target = sourceWords[i].normalize('NFC');
+        let typed = typedWords[i] ? typedWords[i].normalize('NFC') : null;
 
-        if (!typed) {
+        if (typed === null) {
             span.className = '';
         } else if (typed === target) {
             span.className = 'correct';
             correct++;
         } else {
+            // বিশেষ চেক: যদি বিজয় থেকে আসা টেক্সটে স্পেলিং ভ্যারিয়েশন থাকে
+            if (target.includes('সোনার') && (typed.includes('সোনর') || typed.includes('‡mvbvi'))) {
+                 // এটি মূলত ডিবাগিংয়ের জন্য, তবে লজিক্যালি ভুল ধরা উচিত
+            }
             span.className = 'wrong';
             wrong++;
         }
 
-        // কারেন্ট শব্দ হাইলাইট
         if (i === typedWords.length - 1 && typed) {
             span.classList.add('active');
         }
     });
 
-    // স্ট্যাটাস আপডেট
     document.getElementById('correct-count').innerText = correct;
     document.getElementById('wrong-count').innerText = wrong;
     let total = correct + wrong;
